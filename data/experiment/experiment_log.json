@@ -1,0 +1,80 @@
+{
+  "python": "3.14.6",
+  "pandas": "3.1.0",
+  "numpy": "2.4.1",
+  "scikit_learn": "1.9.0",
+  "seed": 42,
+  "train_size": 3539,
+  "test_size": 885,
+  "cv_folds": 5,
+  "grid": {
+    "knn": {
+      "model__n_neighbors": [
+        5,
+        11,
+        21
+      ],
+      "model__weights": [
+        "uniform",
+        "distance"
+      ],
+      "model__p": [
+        1,
+        2
+      ]
+    },
+    "tree": {
+      "model__max_depth": [
+        3,
+        8,
+        12
+      ],
+      "model__min_samples_leaf": [
+        1,
+        10
+      ],
+      "model__class_weight": [
+        null,
+        "balanced"
+      ]
+    }
+  },
+  "selected": {
+    "A_knn": {
+      "params": {
+        "model__n_neighbors": 5,
+        "model__p": 1,
+        "model__weights": "uniform"
+      },
+      "cv_macro_f1": 0.4455266527090703,
+      "cv_dropout_recall": 0.5091776798825257
+    },
+    "A_tree": {
+      "params": {
+        "model__class_weight": null,
+        "model__max_depth": 12,
+        "model__min_samples_leaf": 10
+      },
+      "cv_macro_f1": 0.45076693291916986,
+      "cv_dropout_recall": 0.48106886158126594
+    },
+    "B_knn": {
+      "params": {
+        "model__n_neighbors": 11,
+        "model__p": 1,
+        "model__weights": "uniform"
+      },
+      "cv_macro_f1": 0.46614601084499413,
+      "cv_dropout_recall": 0.5030141432877346
+    },
+    "B_tree": {
+      "params": {
+        "model__class_weight": "balanced",
+        "model__max_depth": 12,
+        "model__min_samples_leaf": 1
+      },
+      "cv_macro_f1": 0.4508404448053837,
+      "cv_dropout_recall": 0.4538063219723317
+    }
+  }
+}

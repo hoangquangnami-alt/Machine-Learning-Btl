@@ -1,0 +1,48 @@
+{
+  "purpose": "Post-hoc descriptive baseline and semantic unknown audit; not model selection",
+  "majority_class_from_train": "Graduate",
+  "baseline_test": {
+    "accuracy": 0.4994350282485876,
+    "macro_f1": 0.22205476011052497,
+    "dropout_recall": 0.0
+  },
+  "semantic_unknown_codes": {
+    "Mother's qualification": {
+      "code": 34,
+      "count_train": 108,
+      "count_all": 130
+    },
+    "Father's qualification": {
+      "code": 34,
+      "count_train": 93,
+      "count_all": 112
+    },
+    "Mother's occupation": {
+      "code": 99,
+      "count_train": 14,
+      "count_all": 17
+    },
+    "Father's occupation": {
+      "code": 99,
+      "count_train": 16,
+      "count_all": 19
+    }
+  },
+  "examples_A_tree": {
+    "Dropout -> Graduate": [
+      3439,
+      482,
+      2596
+    ],
+    "Dropout -> Enrolled": [
+      3321,
+      108,
+      2939
+    ],
+    "Enrolled -> Dropout": [
+      3240,
+      3158,
+      1717
+    ]
+  }
+}

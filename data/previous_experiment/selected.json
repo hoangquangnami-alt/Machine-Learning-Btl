@@ -1,0 +1,30 @@
+{
+  "A_knn": {
+    "params": {
+      "model__n_neighbors": 11
+    },
+    "cv_macro_f1": 0.44315558321015214,
+    "cv_dropout_recall": 0.48280392611484657
+  },
+  "A_tree": {
+    "params": {
+      "model__max_depth": 12
+    },
+    "cv_macro_f1": 0.4347305583228138,
+    "cv_dropout_recall": 0.44404127057732434
+  },
+  "B_knn": {
+    "params": {
+      "model__n_neighbors": 5
+    },
+    "cv_macro_f1": 0.446712672939911,
+    "cv_dropout_recall": 0.5197271813895974
+  },
+  "B_tree": {
+    "params": {
+      "model__max_depth": 12
+    },
+    "cv_macro_f1": 0.4346820262630532,
+    "cv_dropout_recall": 0.44403740629105803
+  }
+}
