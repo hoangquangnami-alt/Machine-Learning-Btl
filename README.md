@@ -1,10 +1,10 @@
-# FIT4013 — Dự đoán sinh viên có nguy cơ bỏ học
+# Nhập môn học máy (FIT4013) — Dự đoán sinh viên có nguy cơ bỏ học
 
 Dự án dự đoán ba trạng thái Dropout, Enrolled, Graduate tại thời điểm nhập học từ 18 trường của bộ [UCI 697](https://doi.org/10.24432/C5MC89), giấy phép CC BY 4.0. Tệp nhỏ `data/raw/data.csv` đã được lưu trong repository, nên không cần mạng để chạy; `python scripts/download_data.py` tải lại tệp từ UCI; dùng `--output` để tránh ghi đè bản đã lưu.
 
 ## Cài đặt
 
-Kết quả đã lưu được tạo với Python 3.14.6; theo lượt rà soát trước, các thư viện ghim cũng đã được kiểm thử với Python 3.12.3. Khác biệt cây quyết định trên 3.12.3 chưa được tái lập trong lượt rà soát này; xem thảo luận trong báo cáo. Cài đặt:
+Kết quả đã lưu được tạo với Python 3.14.6. Lần chạy lại trên macOS ARM với Python 3.12.3 và các thư viện ghim cho cùng cấu hình và dự đoán ở cả bốn tổ hợp; xem `data/experiment/reproducibility_python312_macos.json` và phần thảo luận trong báo cáo. Kết quả trên môi trường khác vẫn cần được kiểm tra riêng. Cài đặt:
 
 ```sh
 python3 -m venv .venv

@@ -12,4 +12,7 @@ AI hỗ trợ mã, phân tích, văn bản và đề xuất chỉnh sửa. Thàn
 
 | Thành viên | Công cụ | Mục đích | Ngày |
 |---|---|---|---|
-| TODO(member) | TODO(member) | TODO(member) | TODO(member) |
+| Hoàng Quang Nam | TODO(member) | TODO(member) | TODO(member) |
+| Bùi Huy Bình | TODO(member) | TODO(member) | TODO(member) |
+| Hoàng Nhật Huy | TODO(member) | TODO(member) | TODO(member) |
+| Nguyễn Văn Linh | TODO(member) | TODO(member) | TODO(member) |

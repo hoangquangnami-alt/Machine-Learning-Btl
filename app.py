@@ -59,7 +59,7 @@ def train_model(name, data_hash, selected_hash):
 def main():
     st.set_page_config(page_title='FIT4013 | Dự đoán sinh viên', page_icon='🎓', layout='wide')
     st.title('🎓 Dự đoán trạng thái sinh viên')
-    st.caption('Dự đoán tại thời điểm nhập học · Ba lớp UCI · FIT4013')
+    st.caption('Dự đoán tại thời điểm nhập học · Ba lớp UCI · Nhập môn học máy (FIT4013)')
     st.info('Mô hình được huấn luyện trên dữ liệu UCI của một cơ sở; chưa được kiểm định cho cơ sở khác. Không dùng dự đoán để tự động quyết định hỗ trợ sinh viên.')
     try:
         df, train, _ = read_source()

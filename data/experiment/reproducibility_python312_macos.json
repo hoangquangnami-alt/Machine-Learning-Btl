@@ -1,0 +1,115 @@
+{
+  "description": "Fresh run compared with committed results; no original result files were overwritten.",
+  "environment": {
+    "python": "3.12.3",
+    "platform": "macOS-26.6.1-arm64-arm-64bit",
+    "machine": "arm64",
+    "pandas": "3.1.0",
+    "numpy": "2.4.1",
+    "scikit_learn": "1.9.0",
+    "seed": 42,
+    "train_size": 3539,
+    "test_size": 885,
+    "cv_folds": 5,
+    "grid": {
+      "knn": {
+        "model__n_neighbors": [
+          5,
+          11,
+          21
+        ],
+        "model__weights": [
+          "uniform",
+          "distance"
+        ],
+        "model__p": [
+          1,
+          2
+        ]
+      },
+      "tree": {
+        "model__max_depth": [
+          3,
+          8,
+          12
+        ],
+        "model__min_samples_leaf": [
+          1,
+          10
+        ],
+        "model__class_weight": [
+          null,
+          "balanced"
+        ]
+      }
+    },
+    "selected": {
+      "A_knn": {
+        "params": {
+          "model__n_neighbors": 5,
+          "model__p": 1,
+          "model__weights": "uniform"
+        },
+        "cv_macro_f1": 0.4455266527090703,
+        "cv_dropout_recall": 0.5091776798825257
+      },
+      "A_tree": {
+        "params": {
+          "model__class_weight": null,
+          "model__max_depth": 12,
+          "model__min_samples_leaf": 10
+        },
+        "cv_macro_f1": 0.45076693291916986,
+        "cv_dropout_recall": 0.48106886158126594
+      },
+      "B_knn": {
+        "params": {
+          "model__n_neighbors": 11,
+          "model__p": 1,
+          "model__weights": "uniform"
+        },
+        "cv_macro_f1": 0.46614601084499413,
+        "cv_dropout_recall": 0.5030141432877346
+      },
+      "B_tree": {
+        "params": {
+          "model__class_weight": "balanced",
+          "model__max_depth": 12,
+          "model__min_samples_leaf": 1
+        },
+        "cv_macro_f1": 0.4508404448053837,
+        "cv_dropout_recall": 0.4538063219723317
+      }
+    }
+  },
+  "models": {
+    "A_knn": {
+      "prediction_differences": 0,
+      "selected_equal": true,
+      "accuracy": 0.4903954802259887,
+      "macro_f1": 0.39550826542105616,
+      "dropout_recall": 0.4612676056338028
+    },
+    "A_tree": {
+      "prediction_differences": 0,
+      "selected_equal": true,
+      "accuracy": 0.5276836158192091,
+      "macro_f1": 0.4393265697198741,
+      "dropout_recall": 0.4859154929577465
+    },
+    "B_knn": {
+      "prediction_differences": 0,
+      "selected_equal": true,
+      "accuracy": 0.5548022598870056,
+      "macro_f1": 0.4279077632916723,
+      "dropout_recall": 0.4753521126760563
+    },
+    "B_tree": {
+      "prediction_differences": 0,
+      "selected_equal": true,
+      "accuracy": 0.4937853107344633,
+      "macro_f1": 0.4516676325155979,
+      "dropout_recall": 0.3732394366197183
+    }
+  }
+}

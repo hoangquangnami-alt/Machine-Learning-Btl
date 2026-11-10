@@ -1,9 +1,9 @@
 \chapter{Đặt vấn đề và phân tích dữ liệu}
 
 \section{Bối cảnh và mục tiêu}
-Bỏ học giữa chừng là một vấn đề mà các cơ sở giáo dục cần quan tâm. Khi sinh viên gặp khó khăn về học tập, tài chính hoặc hoàn cảnh cá nhân, việc nhà trường biết sớm có thể giúp việc tư vấn được thực hiện kịp thời hơn. Tuy nhiên, những nguyên nhân này không phải lúc nào cũng thể hiện rõ trong hồ sơ nhập học. Vì vậy, dự đoán bằng học máy chỉ có thể cung cấp thêm một căn cứ để xem xét, chứ không thể thay thế trao đổi trực tiếp với sinh viên.
+Nhà trường có thể hỗ trợ sinh viên sớm hơn nếu nhận biết được nguy cơ bỏ học. Tuy nhiên, hồ sơ nhập học không phản ánh đầy đủ khó khăn về học tập, tài chính hay hoàn cảnh cá nhân. Vì vậy, kết quả dự đoán chỉ là một căn cứ tham khảo và không thay thế việc trao đổi trực tiếp với sinh viên.
 
-Kết quả của dự án hướng đến hai nhóm đối tượng chính: (1) \textbf{cố vấn học tập và bộ phận hỗ trợ sinh viên} dùng danh sách cảnh báo để ưu tiên tiếp cận sớm; (2) \textbf{ban quản lý đào tạo} dùng phân tích lỗi theo ngành và nhóm tuổi để thiết kế chính sách hỗ trợ có mục tiêu. Mô hình được thiết kế như một công cụ sàng lọc bổ trợ, không thay thế phán xét của con người.
+Kết quả có thể hỗ trợ cố vấn học tập ưu tiên liên hệ với sinh viên và giúp bộ phận quản lý xem xét sai số theo ngành, nhóm tuổi. Mô hình chỉ có vai trò sàng lọc; quyết định hỗ trợ vẫn cần dựa trên thông tin và đánh giá của con người.
 
 Trong bài tập này, nhóm sử dụng bộ dữ liệu \textit{Predict Students' Dropout and Academic Success} do UCI công bố \cite{uci}. Mục tiêu là xây dựng chương trình dự đoán trạng thái của một sinh viên khi đến cuối thời hạn chuẩn của khóa học. Dự đoán được đặt tại thời điểm nhập học, nghĩa là mô hình chỉ nên nhận những thông tin có thể biết vào thời điểm đó. Bộ dữ liệu có ba nhãn:
 \begin{itemize}

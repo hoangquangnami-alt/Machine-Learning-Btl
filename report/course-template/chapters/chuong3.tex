@@ -1,7 +1,7 @@
 \chapter{Phân tích mã nguồn và chức năng}
 
 \section{Cấu trúc chương trình}
-Nhóm tách chương trình thành các mô-đun độc lập theo nguyên tắc đơn nhiệm; các mô-đun nghiệp vụ chính nằm trong gói \texttt{student\_success/}, các kịch bản thực thi nằm trong \texttt{scripts/}, giao diện người dùng nằm trong \texttt{app.py} và chuỗi sổ tay nghiên cứu nằm trong \texttt{notebooks/}. Cấu trúc các tệp chính được tổng hợp trong Bảng~\ref{tab:modules}.
+Mã xử lý và huấn luyện nằm trong \texttt{student\_success/}; các script phân tích nằm trong \texttt{scripts/}. Ứng dụng demo nằm trong \texttt{app.py}, còn các notebook minh họa từng bước trong \texttt{notebooks/}. Bảng~\ref{tab:modules} tóm tắt chức năng của các tệp chính.
 
 \begin{table}[H]\centering\small
 \caption{Các tệp và thư mục chính của dự án}\label{tab:modules}
@@ -27,7 +27,7 @@ Hàm \texttt{load\_data} trong \texttt{data.py} chịu trách nhiệm kiểm tra
 \end{itemize}
 
 \section{Xây dựng pipeline và trích xuất đoạn mã then chốt}
-Để ngăn chặn hoàn toàn rò rỉ dữ liệu giữa tập huấn luyện và tập kiểm định, quy trình tiền xử lý được xây dựng hoàn toàn bằng \texttt{ColumnTransformer} và đóng gói trong \texttt{Pipeline} của scikit-learn.
+Nhóm đặt bộ tiền xử lý trong \texttt{Pipeline} của scikit-learn để các tham số tiền xử lý của mỗi fold chỉ được học từ phần huấn luyện của fold đó.
 
 \subsection{Xây dựng bộ tiền xử lý với ColumnTransformer}
 Đoạn trích dưới đây cho thấy cách ghép các nhánh trong ColumnTransformer; ba pipeline con được cấu hình trong \texttt{preprocess.py}:
@@ -68,11 +68,11 @@ search.fit(X.loc[train_idx], y.loc[train_idx])
 Việc đặt bộ tiền xử lý bên trong \texttt{Pipeline} đảm bảo mỗi fold validation trong quá trình CV được đối xử hoàn toàn như dữ liệu mới: các tham số $\mu, \sigma$ và từ điển mã hóa one-hot chỉ được học trên 4 fold huấn luyện của vòng lặp đó.
 
 \section{Cách kiểm tra kết quả và ứng dụng demo}
-Kịch bản \texttt{scripts/verify\_results.py} thực hiện kiểm toán độc lập:
+Script \texttt{scripts/verify\_results.py} kiểm tra các kết quả đã lưu:
 \begin{enumerate}
     \item Xác minh tập train (3.539 mẫu) và test (885 mẫu) không có phần tử giao nhau.
     \item Đảm bảo 5 fold kiểm định chéo bao phủ chính xác tập train mà không bị trùng lặp.
     \item Đọc trực tiếp các tệp dự đoán CSV đã xuất để tính toán lại ma trận nhầm lẫn và các chỉ số, đối chiếu chéo với các tệp JSON kết quả.
 \end{enumerate}
 
-Ứng dụng web trong \texttt{app.py} (triển khai qua Streamlit) cung cấp giao diện trực quan cho phép người dùng chọn bất kỳ tổ hợp mô hình nào trong 4 tổ hợp đã huấn luyện để dự đoán cho hồ sơ sinh viên mới hoặc tải lên tệp danh sách hàng loạt, và các điểm đầu ra theo lớp; ứng dụng không giải thích nguyên nhân của từng dự đoán.
+Ứng dụng web trong \texttt{app.py} (triển khai qua Streamlit) cung cấp giao diện trực quan cho phép người dùng chọn bất kỳ tổ hợp mô hình nào trong 4 tổ hợp đã huấn luyện để dự đoán cho hồ sơ sinh viên mới hoặc tải lên tệp danh sách hàng loạt, và xem điểm của từng lớp. Ứng dụng không giải thích nguyên nhân của từng dự đoán.

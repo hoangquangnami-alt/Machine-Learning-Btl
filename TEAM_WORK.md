@@ -1,6 +1,17 @@
 # Phân công và nhật ký nhóm
 
-Việc chia tệp là kế hoạch, không phải bằng chứng đóng góp; số commit không phải thước đo duy nhất. Mỗi thành viên bổ sung nhật ký công việc thực tế: TODO(member).
+Bảng dưới đây ghi lại lịch sử Git, không thay thế nhật ký công việc của từng thành viên. Số commit không phải thước đo duy nhất: mỗi người cần tự bổ sung phần việc thực tế và đọc lại phần mình chịu trách nhiệm. Commit `9186a02` tập hợp nhiều thay đổi; người đứng tên cần hiểu các thay đổi đó khi trình bày.
+
+## Nhật ký công việc của thành viên
+
+Mỗi thành viên tự ghi công việc, thời gian và minh chứng của mình; không suy ra phân công từ tác giả commit.
+
+| Thành viên | Công việc | Thời gian | Minh chứng |
+|---|---|---|---|
+| Hoàng Quang Nam | TODO(member) | TODO(member) | TODO(member) |
+| Bùi Huy Bình | TODO(member) | TODO(member) | TODO(member) |
+| Hoàng Nhật Huy | TODO(member) | TODO(member) | TODO(member) |
+| Nguyễn Văn Linh | TODO(member) | TODO(member) | TODO(member) |
 
 ## Nhật ký Git
 
@@ -8,6 +19,7 @@ Area ghi nhóm đường dẫn xuất hiện trong commit, không suy diễn tr�
 
 | Ngày | Tác giả | Commit + thông điệp | Area |
 |---|---|---|---|
+| 2026-11-10 | hoangquangnami-alt | `9186a02` vá lỗi lần cuối | `.gitattributes`, `.gitignore`, `AI_USAGE.md`, `README.md`, `TEAM_WORK.md`, `app.py`, `data/`, `notebooks/`, `report/`, `requirements.txt`, `scripts/`, `student_success/` |
 | 2026-11-10 | hoangquangnami-alt | `65539a6` Add team roles and task log for project | `TEAM_WORK.md` |
 | 2026-11-10 | hoangquangnami-alt | `63fa0d6` Create README.md for project documentation | `README.md` |
 | 2026-11-10 | hoangquangnami-alt | `7307b1f` Add AI usage documentation | `AI_USAGE.md` |

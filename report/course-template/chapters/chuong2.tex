@@ -36,7 +36,7 @@ Trong tập huấn luyện, nhóm thiết lập kiểm định chéo 5 fold phâ
 Để chống rò rỉ thông tin trong quy trình huấn luyện, mọi thao tác tính toán tham số thống kê (như tính trung vị để điền khuyết, học từ điển one-hot, tính giá trị trung bình $\mu$ và độ lệch chuẩn $\sigma$ để chuẩn hóa) đều được đóng gói nghiêm ngặt bên trong \texttt{Pipeline} của scikit-learn. Quá trình kiểm định chéo chỉ thực hiện \texttt{fit} trên 4 fold huấn luyện và \texttt{transform} trên fold kiểm định (validation fold). Test không được dùng trong GridSearchCV, nhưng đã được xem trong các lần phát triển trước; do đó đây không còn là tập kiểm thử cuối cùng độc lập.
 
 \section{Hai luồng tiền xử lý (Luồng A và Luồng B)}
-Để trả lời câu hỏi nghiên cứu của đề bài: \textit{“Thay đổi cách chuẩn bị dữ liệu có làm đổi hiệu quả mô hình không, và tại sao?”}, nhóm thiết kế hai luồng tiền xử lý có sự khác biệt rõ rệt về kỹ thuật đặc trưng và mức độ xử lý phân loại:
+Để xem cách chuẩn bị dữ liệu ảnh hưởng thế nào đến mô hình, nhóm xây dựng hai luồng tiền xử lý:
 
 \begin{itemize}
     \item \textbf{Luồng A (Baseline Pipeline)}:
@@ -57,7 +57,7 @@ Trong tập huấn luyện, nhóm thiết lập kiểm định chéo 5 fold phâ
 \end{itemize}
 
 \section{Không gian siêu tham số và thuật toán sử dụng}
-Nhóm khảo sát hai thuật toán phân loại cốt lõi với nguyên lý hoạt động bổ trợ lẫn nhau:
+Nhóm khảo sát hai thuật toán phân loại:
 \begin{enumerate}
     \item \textbf{K láng giềng gần nhất (K-NN)}: Hoạt động dựa trên hình học không gian khoảng cách giữa các điểm dữ liệu. Không gian siêu tham số khảo sát gồm:
     \begin{itemize}

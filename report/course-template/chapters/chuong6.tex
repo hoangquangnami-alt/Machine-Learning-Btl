@@ -1,7 +1,7 @@
 \chapter{Tổng kết và khuyến nghị ứng dụng}
 
 \section{Kết quả và giới hạn}
-B/K-NN đạt macro-F1 CV cao nhất trong bốn tổ hợp ở lưới chính (0,4661). Trên test, cấu hình này có macro-F1 0,4279, recall Dropout 0,4754 và recall Enrolled 0,0692. B/cây đạt macro-F1 test 0,4517 và recall Enrolled 0,3899, nhưng recall Dropout chỉ 0,3732. Kết quả B/cây phụ thuộc cấu hình được chọn (Mục~\ref{sec:tree-sensitivity}). Mỗi cấu hình có sự đánh đổi; ưu tiên mô hình cần gắn với mục tiêu hỗ trợ và nguồn lực.
+B/K-NN đạt macro-F1 CV cao nhất trong bốn tổ hợp ở lưới chính (0,4661). Trên test, cấu hình này có macro-F1 0,4279, recall Dropout 0,4754 và recall Enrolled 0,0692. B/cây đạt macro-F1 test 0,4517 và recall Enrolled 0,3899, nhưng recall Dropout chỉ 0,3732. Kết quả B/cây phụ thuộc cấu hình được chọn (Mục~\ref{sec:tree-sensitivity}). Việc chọn mô hình phụ thuộc vào mục tiêu hỗ trợ và nguồn lực của nhà trường.
 
 Ablation trên cùng fold cho thấy khi giữ tham số B/K-NN, bỏ nhóm tuổi làm macro-F1 CV giảm 0,0182; bỏ gộp mã hiếm giảm 0,0076. Đây là phép so sánh khám phá sau khi đã chọn cấu hình; cần kiểm tra lại trên dữ liệu khác. Giới hạn của tập test được nêu tại Mục~\ref{sec:split}.
 

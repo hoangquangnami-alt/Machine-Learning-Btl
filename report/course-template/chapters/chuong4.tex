@@ -1,7 +1,7 @@
 \chapter{Thử nghiệm và kết quả}
 
 \section{Các mô hình Baseline đối chứng}
-Để đánh giá chính xác giá trị gia tăng của các kỹ thuật tinh chỉnh và tiền xử lý, nhóm thiết lập ba mốc đối chứng (baseline) theo đúng khuyến nghị của hướng dẫn học phần:
+Nhóm dùng ba mô hình đối chứng để so sánh với các cấu hình đã tinh chỉnh:
 \begin{enumerate}
     \item \textbf{Baseline lớp đa số (Zero-R / Majority Class)}: Dự đoán mọi mẫu đều thuộc lớp \texttt{Graduate} (chiếm 49,9\% dữ liệu huấn luyện). Mốc này đạt Accuracy $0{,}4994$ trên tập kiểm thử nhưng Macro-F1 chỉ đạt $0{,}2221$, và hoàn toàn bất lực trong việc cảnh báo nguy cơ bỏ học (Recall Dropout bằng $0{,}0000$).
     \item \textbf{Baseline K-NN mặc định (Default K-NN)}: Sử dụng cấu hình tiêu chuẩn của scikit-learn ($k=5$, trọng số biểu quyết đều, khoảng cách Euclid $p=2$) kết hợp với Luồng A cơ bản (không tinh chỉnh siêu tham số). Trên 5-fold CV, mô hình đạt Macro-F1 $0{,}4401 \pm 0{,}0140$; trên tập test đạt Accuracy $0{,}4972$ và Macro-F1 $0{,}4126$.
@@ -93,19 +93,17 @@ Ma trận nhầm lẫn bộc lộ hai quy luật dự đoán quan trọng:
 \end{enumerate}
 
 \section{So sánh Luồng A và Luồng B: Tác động của tiền xử lý}
-Câu hỏi cốt lõi của bài toán dữ liệu bảng là: \textit{“Thay đổi cách chuẩn bị dữ liệu có làm đổi hiệu quả mô hình không, và tại sao?”}
-
-Kết quả thực nghiệm cho thấy rõ ràng:
+So sánh hai luồng cho thấy:
 \begin{itemize}
     \item \textbf{Đối với K-NN}: B/K-NN cao hơn A/K-NN 0,0206 điểm macro-F1 CV (0,4661 so với 0,4455); accuracy trên tập test lần lượt là 0,5548 và 0,4904. K-NN phụ thuộc vào khoảng cách; ablation trên train ở Mục~\ref{sec:ablation} kiểm tra từng thay đổi khi giữ nguyên tham số B.
     \item \textbf{Đối với Cây quyết định}: B/cây có macro-F1 test 0,4517 và nhận diện lớp Enrolled tốt hơn A/cây. Hai cấu hình đồng thời khác về tiền xử lý, trọng số lớp và tham số, vì vậy không thể quy chênh lệch riêng cho một yếu tố.
 \end{itemize}
 
-Thay đổi chuẩn bị dữ liệu làm thay đổi chất lượng quan sát: với K-NN, B tăng macro-F1 CV từ 0,4455 lên 0,4661. Ablation cho thấy bỏ nhóm tuổi giảm 0,0182, bỏ gộp mã hiếm giảm 0,0076 và bỏ hiệu điểm chỉ giảm 0,0007; giả thuyết là hai thay đổi đầu điều chỉnh khoảng cách và giảm nhiễu, cần kiểm chứng độc lập. Với cây, A và B có điểm CV gần bằng nhau; trong ablation chỉ gộp mã hiếm tạo chênh lệch đáng kể về độ lớn (0,0140), chưa chứng minh ý nghĩa thống kê. Thứ hạng độ quan trọng Gini của hiệu điểm (thứ ba) không đồng nghĩa giá trị dự báo ngoài mẫu. Kết luận về B/cây phụ thuộc cấu hình được chọn (xem Mục~\ref{sec:tree-sensitivity}).
+Cách chuẩn bị dữ liệu làm thay đổi kết quả trong thí nghiệm này: với K-NN, B tăng macro-F1 CV từ 0,4455 lên 0,4661. Ablation cho thấy bỏ nhóm tuổi giảm 0,0182, bỏ gộp mã hiếm giảm 0,0076 và bỏ hiệu điểm chỉ giảm 0,0007; giả thuyết là hai thay đổi đầu điều chỉnh khoảng cách và giảm nhiễu, cần kiểm chứng độc lập. Với cây, A và B có điểm CV gần bằng nhau; trong ablation chỉ gộp mã hiếm tạo chênh lệch đáng kể về độ lớn (0,0140), chưa chứng minh ý nghĩa thống kê. Thứ hạng độ quan trọng Gini của hiệu điểm (thứ ba) không đồng nghĩa giá trị dự báo ngoài mẫu. Kết luận về B/cây phụ thuộc cấu hình được chọn (xem Mục~\ref{sec:tree-sensitivity}).
 
 
 \section{Ablation trên các fold train}\label{sec:ablation}
-Bảng~\ref{tab:ablation} giữ nguyên siêu tham số của từng mô hình B đã chọn và cùng năm fold, rồi bỏ một nhóm biến đổi mỗi lần. Điểm là macro-F1 trung bình trên train; không huấn luyện lại hay lựa chọn theo test. Các so sánh được thực hiện sau khi thiết kế B, là phân tích khám phá trên cùng dữ liệu và không tách biệt mọi tương tác giữa các biến.
+Bảng~\ref{tab:ablation} giữ nguyên siêu tham số của từng mô hình B đã chọn và cùng năm fold, rồi bỏ một nhóm biến đổi mỗi lần. Mỗi biến thể được huấn luyện và đánh giá lại trên các fold train; tập test không tham gia phép so sánh. Các so sánh được thực hiện sau khi thiết kế B, là phân tích khám phá trên cùng dữ liệu và không tách biệt mọi tương tác giữa các biến.
 \begin{table}[H]\centering\small
 \caption{Ablation luồng B: macro-F1 trung bình trên 5 fold train}\label{tab:ablation}
 \begin{tabular}{lrr}\toprule

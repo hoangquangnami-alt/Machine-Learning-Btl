@@ -1,7 +1,7 @@
 \chapter{Thảo luận và phân tích lỗi}
 
 \section{So sánh ưu và nhược điểm của các pipeline và mô hình}
-Bảng~\ref{tab:pros-cons} tổng hợp ưu và nhược điểm của từng phương án tiền xử lý (Luồng A vs Luồng B) và từng thuật toán phân loại (K-NN vs Cây quyết định).
+Bảng~\ref{tab:pros-cons} tóm tắt ưu và nhược điểm của hai luồng tiền xử lý và hai thuật toán.
 
 \begin{table}[H]\centering\small
 \caption{Ưu và nhược điểm của các pipeline tiền xử lý và mô hình phân loại}\label{tab:pros-cons}
@@ -15,10 +15,10 @@ Thành phần & Ưu điểm & Nhược điểm / Hạn chế\\\midrule
 \end{table}
 
 \subsection{Độ nhạy của cây quyết định}\label{sec:tree-sensitivity}
-Các cấu hình cây có điểm CV gần nhau so với độ lệch giữa các fold, nên lựa chọn cấu hình cần được kiểm tra trên môi trường khác. Trên Python 3.14.6, chạy lại giữ nguyên dự đoán và cấu hình của bốn tổ hợp; với B/cây cố định cấu hình đã chọn, macro-F1 test trung bình qua seed 0--9 là 0,4505 (độ lệch chuẩn 0,0026). TODO(human): xác minh thí nghiệm môi trường thứ hai trước khi báo cáo kết quả tái lập.
+Trên macOS ARM với Python 3.12.3 và các thư viện ghim, lần chạy lại cho cùng cấu hình và dự đoán với kết quả Python 3.14.6 đã lưu ở cả bốn tổ hợp. B/cây vẫn chọn độ sâu 12, với accuracy 0,4938, macro-F1 0,4517 và recall Dropout 0,3732 trên tập test. Các điểm CV của một số cấu hình cây rất gần nhau so với độ lệch giữa các fold, nên kết quả chọn cấu hình vẫn cần được kiểm tra trên môi trường và dữ liệu khác.
 
 \section{Phân tích độ quan trọng của đặc trưng (Feature Importances)}
-Trích xuất thuộc tính \texttt{feature\_importances\_} từ mô hình Cây quyết định B (Bảng~\ref{tab:feature-importance}) cho thấy mức độ đóng góp của từng biến vào việc giảm độ hỗn tạp (Gini impurity) qua các điểm chia.
+Bảng~\ref{tab:feature-importance} trình bày độ quan trọng Gini của các đặc trưng trong cây B đã chọn.
 
 \begin{table}[H]\centering\small
 \caption{Top 10 đặc trưng quan trọng nhất trong mô hình Cây quyết định (B / Cây)}\label{tab:feature-importance}
@@ -72,7 +72,7 @@ Trong cả 4 tổ hợp, lớp \texttt{Enrolled} luôn có F1-score thấp nhấ
 \end{enumerate}
 
 \section{Tác động thực tế của các loại sai lầm trong giáo dục}
-Trong bài toán hỗ trợ sinh viên, hai loại sai lầm dự đoán có chi phí và hệ quả xã hội hoàn toàn bất đối xứng:
+Trong ứng dụng hỗ trợ sinh viên, bỏ sót và cảnh báo nhầm dẫn đến những hệ quả khác nhau:
 
 \begin{itemize}
     \item \textbf{Bỏ sót sinh viên bỏ học (False Negative -- FN)}:
@@ -80,7 +80,7 @@ Trong bài toán hỗ trợ sinh viên, hai loại sai lầm dự đoán có chi
     \item \textbf{Cảnh báo nhầm sinh viên bình thường (False Positive -- FP)}:
     Ở mô hình B / K-NN, có 118 sinh viên (48 Enrolled và 70 Graduate) bị dán nhãn nhầm là có nguy cơ Dropout. Hệ quả của sai lầm này là tốn thời gian và công sức của đội ngũ cố vấn học tập khi phải lên lịch gặp gỡ, trao đổi. Cảnh báo sai có thể gây phiền hà hoặc kỳ thị nếu thông tin bị sử dụng không phù hợp; cần hạn chế truy cập và trao đổi tôn trọng.
 \end{itemize}
-Do đó, trong thực tế, nhà trường nên ưu tiên mô hình có Recall Dropout cao (hoặc chủ động hạ ngưỡng quyết định để đón bắt được nhiều sinh viên nguy cơ hơn), chấp nhận một mức tăng vừa phải của cảnh báo sai.
+Khi lựa chọn mô hình, nhà trường cần cân nhắc giữa việc giảm bỏ sót và khả năng xử lý các cảnh báo nhầm. Nếu thử thay đổi ngưỡng dự đoán, cần đánh giá lại sự đánh đổi này trên dữ liệu phù hợp.
 
 \section{Giới hạn nghiên cứu}
 Nhóm ghi nhận một số giới hạn chính của bài nghiên cứu:
