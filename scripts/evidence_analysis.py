@@ -1,5 +1,6 @@
 """Baselines, leakage sensitivity, ablations (CV on train) and descriptive bootstrap on viewed test."""
 from pathlib import Path
+import os
 import json, sys
 import numpy as np
 import pandas as pd
@@ -15,7 +16,7 @@ ROOT=Path(__file__).resolve().parent.parent
 sys.path.insert(0,str(ROOT))
 from student_success.data import CATEGORICAL, NUMERIC, EXCLUDED, SEED, LABELS
 from student_success.preprocess import build_preprocessor
-R=ROOT/'data/experiment'; df=pd.read_csv(ROOT/'data/raw/data.csv',sep=';');df.columns=df.columns.str.strip()
+R=Path(os.environ.get('FIT_RESULTS', ROOT/'data/experiment')); df=pd.read_csv(ROOT/'data/raw/data.csv',sep=';');df.columns=df.columns.str.strip()
 tr=pd.read_csv(R/'train_indices.csv').row_index;te=pd.read_csv(R/'test_indices.csv').row_index
 X=df[CATEGORICAL+NUMERIC];y=df.Target
 cv=StratifiedKFold(n_splits=5,shuffle=True,random_state=SEED)

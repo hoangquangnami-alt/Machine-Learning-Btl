@@ -75,7 +75,7 @@ def main():
     summary = pd.DataFrame([{'model': n, 'accuracy': m['accuracy'], 'macro_precision': m['classification_report']['macro avg']['precision'], 'macro_recall': m['classification_report']['macro avg']['recall'], 'macro_f1': m['classification_report']['macro avg']['f1-score'], 'dropout_recall': m['classification_report']['Dropout']['recall']} for n, m in all_metrics.items()])
     summary.to_csv(out/'summary.csv', index=False)
     fig, ax = plt.subplots(figsize=(7, 4)); summary.set_index('model')[['macro_f1','dropout_recall']].plot.bar(ax=ax, ylim=(0,1)); ax.set_ylabel('Score'); fig.tight_layout(); fig.savefig(images/'comparison.png', dpi=150); plt.close(fig)
-    log = {'python': platform.python_version(), 'pandas': pd.__version__, 'numpy': np.__version__, 'scikit_learn': sklearn.__version__, 'seed': SEED, 'train_size': len(train_idx), 'test_size': len(test_idx), 'cv_folds': 5, 'grid': {k: v[1] for k, v in configs.items()}, 'selected': selected}
+    log = {'python': platform.python_version(), 'platform': platform.platform(), 'machine': platform.machine(), 'pandas': pd.__version__, 'numpy': np.__version__, 'scikit_learn': sklearn.__version__, 'seed': SEED, 'train_size': len(train_idx), 'test_size': len(test_idx), 'cv_folds': 5, 'grid': {k: v[1] for k, v in configs.items()}, 'selected': selected}
     (out/'experiment_log.json').write_text(json.dumps(log, indent=2)+'\n')
 
 if __name__ == '__main__':

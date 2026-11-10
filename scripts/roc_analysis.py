@@ -1,5 +1,6 @@
 """ROC-AUC OvR cho B/K-NN: OOF trên train và mô tả trên test đã xem."""
 from pathlib import Path
+import os
 import json,sys
 import numpy as np,pandas as pd
 from sklearn.metrics import roc_auc_score
@@ -10,7 +11,7 @@ from sklearn.preprocessing import label_binarize
 ROOT=Path(__file__).resolve().parent.parent;sys.path.insert(0,str(ROOT))
 from student_success.data import CATEGORICAL,NUMERIC,SEED
 from student_success.preprocess import build_preprocessor
-R=ROOT/'data/experiment';x=pd.read_csv(ROOT/'data/raw/data.csv',sep=';');x.columns=x.columns.str.strip()
+R=Path(os.environ.get('FIT_RESULTS', ROOT/'data/experiment'));x=pd.read_csv(ROOT/'data/raw/data.csv',sep=';');x.columns=x.columns.str.strip()
 tr=pd.read_csv(R/'train_indices.csv').row_index;te=pd.read_csv(R/'test_indices.csv').row_index
 params=json.loads((R/'selected.json').read_text())['B_knn']['params'];params={k.removeprefix('model__'):v for k,v in params.items()}
 pipe=Pipeline([('preprocess',build_preprocessor('B')),('model',KNeighborsClassifier(**params))])

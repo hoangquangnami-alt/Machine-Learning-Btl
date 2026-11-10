@@ -1,6 +1,6 @@
 \chapter{Thiết kế giải pháp và quy trình học máy}
 
-Quy trình chung của bài tập được trình bày ở Sơ đồ~\ref{sd:pipeline}. Sau khi kiểm tra dữ liệu và tách tập, các bước chọn tham số chỉ dùng phần train. Tập test không tham gia chọn tham số bằng CV; tuy nhiên test đã được xem ở các phiên bản trước và không còn là tập kiểm thử cuối cùng độc lập.
+Quy trình chung của bài tập được trình bày ở Sơ đồ~\ref{sd:pipeline}. Sau khi kiểm tra dữ liệu và tách tập, các bước chọn tham số chỉ dùng phần train. Tập test không tham gia chọn tham số bằng CV (xem Mục~\ref{sec:split}).
 
 \begin{sodo}
 \centering
@@ -28,7 +28,7 @@ Danh sách 18 cột được chọn thủ công theo thời điểm dự đoán;
     \item \textbf{14 biến phân loại}: Tình trạng hôn nhân, Hình thức đăng ký, Ngành học, Ca học, Loại văn bằng trước, Quốc tịch, Trình độ và nghề nghiệp của cha mẹ (4 cột), Tình trạng chuyển nơi ở, Nhu cầu giáo dục đặc biệt, Giới tính, và Sinh viên quốc tế. Các biến này mô tả một phần thông tin nhân khẩu và lộ trình trước nhập học; thời điểm ghi nhận từng trường vẫn cần xác minh.
 \end{itemize}
 
-\section{Chia dữ liệu và kiểm soát rò rỉ}
+\section{Chia dữ liệu và kiểm soát rò rỉ}\label{sec:split}
 Toàn bộ dữ liệu (4.424 dòng) được phân chia thành 80\% tập huấn luyện (3.539 mẫu) và 20\% tập kiểm thử (885 mẫu) bằng phương pháp phân tầng theo nhãn, với tham số ngẫu nhiên cố định \texttt{random\_state = 42}. Chỉ số dòng được lưu trữ trong \texttt{train\_indices.csv} và \texttt{test\_indices.csv} để đảm bảo đối chiếu phép chia.
 
 Trong tập huấn luyện, nhóm thiết lập kiểm định chéo 5 fold phân tầng với seed 42 và xáo trộn trước khi chia. Việc cố định bộ fold này đảm bảo mọi mô hình và mọi cấu hình tiền xử lý đều được đánh giá trên cùng tập mẫu con, loại bỏ nhiễu do phân chia ngẫu nhiên khác nhau.
@@ -49,7 +49,7 @@ Trong tập huấn luyện, nhóm thiết lập kiểm định chéo 5 fold phâ
         \item \emph{Gộp mã hiếm}: Biến phân loại sau khi điền thiếu được mã hóa one-hot có kèm ngưỡng tần suất \texttt{min\_frequency = 0.01} (mã mới được ghép vào nhóm hiếm nếu nhóm đó tồn tại). Các hạng mục xuất hiện dưới 1\% trong tập huấn luyện của fold sẽ được gộp chung vào một nhóm hiếm. Kỹ thuật này giảm số cột one-hot, nhưng gộp các nhóm khác nhau và có thể làm mất thông tin.
         \item \emph{Trích xuất đặc trưng mới dựa trên giả thuyết EDA}:
         \begin{enumerate}
-            \item \texttt{age\_band}: Nhóm tuổi rời rạc hóa ($<20$, $20$--$24$, $25$--$29$, $\ge 30$) dựa trên giả thuyết tỷ lệ Dropout tăng vọt ở các lứa tuổi lớn hơn đã phát hiện trong phân tích EDA.
+            \item \texttt{age\_band}: Nhóm tuổi rời rạc hóa ($<20$, $20$--$24$, $25$--$29$, $\ge 30$) mã hóa thành một cột số thứ tự 0--3 rồi chuẩn hóa, không one-hot. Với K-NN, đây là bản biến đổi đơn điệu theo bậc của tuổi đã có, làm thay đổi trọng số khoảng cách theo tuổi.
             \item Hiệu hai điểm: Hiệu số giữa điểm tuyển sinh và điểm văn bằng trước. Đại lượng này biểu diễn chênh lệch giữa hai điểm; không trực tiếp đo áp lực hay nguyên nhân học tập.
         \end{enumerate}
         \item Hai đặc trưng dẫn xuất cũng được chuẩn hóa theo trung bình và độ lệch chuẩn.

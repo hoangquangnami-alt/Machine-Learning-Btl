@@ -1,5 +1,6 @@
 """EDA trên train và phân tích lỗi mô tả trên test đã xem; không chọn mô hình."""
 from pathlib import Path
+import os
 import json
 import sys
 import pandas as pd
@@ -13,7 +14,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 from student_success.data import CATEGORICAL, NUMERIC, SEED
 from student_success.preprocess import build_preprocessor
-R=ROOT/'data/experiment'; IMG=ROOT/'report/course-template/images/results'
+R=Path(os.environ.get('FIT_RESULTS', ROOT/'data/experiment')); IMG=Path(os.environ.get('FIT_IMAGES', ROOT/'report/course-template/images/results')); IMG.mkdir(parents=True, exist_ok=True)
 df=pd.read_csv(ROOT/'data/raw/data.csv',sep=';'); df.columns=df.columns.str.strip()
 train=df.loc[pd.read_csv(R/'train_indices.csv').row_index].copy()
 train['Nhóm tuổi']=pd.cut(train['Age at enrollment'], [0,19,24,29,200], labels=['< 20','20–24','25–29','≥ 30'])
@@ -24,7 +25,7 @@ for ax,col,title,maxgroups in [(axes[0],'Course','Ngành (mã UCI)',8),(axes[1],
  rows=[]
  for group in counts:
   sub=train[train[col]==group]; rows.append((str(group),len(sub),float((sub.Target=='Dropout').mean())))
- table=pd.DataFrame(rows,columns=['nhom','n','dropout_rate']);table.to_csv(R/f'eda_dropout_{col.replace(" ","_")}.csv',index=False)
+ table=pd.DataFrame(rows,columns=['nhom','n','dropout_rate']);table.to_csv(R/f'eda_dropout_{"age_group" if col == "Nhóm tuổi" else col.replace(" ","_")}.csv',index=False)
  y=np.arange(len(rows));ax.barh(y,table.dropout_rate,color='#315ea8');ax.set_yticks(y,[f'{a} (n={b})' for a,b,_ in rows]);ax.invert_yaxis();ax.set_xlim(0,1);ax.set_title(title,loc='left',fontweight='bold');ax.set_xlabel('Tỷ lệ Dropout trên train');
  for i,v in enumerate(table.dropout_rate): ax.text(min(v+.02,.9),i,f'{v:.0%}',va='center',fontsize=9)
  ax.grid(axis='x',alpha=.2);ax.set_axisbelow(True)

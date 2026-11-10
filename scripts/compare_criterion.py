@@ -1,5 +1,6 @@
 """So sánh Gini và entropy bằng CV trên train cho cây B đã chọn; không dùng test."""
 from pathlib import Path
+import os
 import sys,json
 import pandas as pd
 from sklearn.model_selection import StratifiedKFold, cross_val_score
@@ -9,7 +10,7 @@ ROOT=Path(__file__).resolve().parent.parent
 sys.path.insert(0,str(ROOT))
 from student_success.data import CATEGORICAL,NUMERIC,SEED
 from student_success.preprocess import build_preprocessor
-R=ROOT/'data/experiment'
+R=Path(os.environ.get('FIT_RESULTS', ROOT/'data/experiment'))
 df=pd.read_csv(ROOT/'data/raw/data.csv',sep=';');df.columns=df.columns.str.strip()
 idx=pd.read_csv(R/'train_indices.csv').row_index
 params=json.loads((R/'selected.json').read_text())['B_tree']['params']

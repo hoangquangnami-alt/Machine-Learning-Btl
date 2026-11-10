@@ -1,63 +1,72 @@
 # FIT4013 — Dự đoán sinh viên có nguy cơ bỏ học
 
-Dự đoán tại thời điểm nhập học ba trạng thái cuối thời hạn chuẩn của khóa học: **Dropout**, **Enrolled** và **Graduate**. Đây là bài toán đánh giá học thuật, không phải hệ thống ra quyết định tự động. Hướng dẫn học phần yêu cầu EDA, hai luồng tiền xử lý, ít nhất hai thuật toán, đánh giá và phân tích lỗi.
+Dự án dự đoán ba trạng thái Dropout, Enrolled, Graduate tại thời điểm nhập học từ 18 trường của bộ [UCI 697](https://doi.org/10.24432/C5MC89), giấy phép CC BY 4.0. Tệp nhỏ `data/raw/data.csv` đã được lưu trong repository, nên không cần mạng để chạy; `python scripts/download_data.py` tải lại tệp từ UCI; dùng `--output` để tránh ghi đè bản đã lưu.
 
-## Dữ liệu và thời điểm dự đoán
+## Cài đặt
 
-Nguồn: Realinho, V., Vieira Martins, M., Machado, J., & Baptista, L. (2021), [Predict Students' Dropout and Academic Success](https://doi.org/10.24432/C5MC89), UCI Machine Learning Repository, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). UCI mô tả dữ liệu nhập học và kết quả hai học kỳ; thời điểm ghi nhận cụ thể của từng trường chưa được xác nhận. Không dùng các chỉ số hai học kỳ, nợ, học phí, học bổng và kinh tế vĩ mô vì có thể chưa biết tại thời điểm dự đoán. Danh sách 18 biến được phép nằm trong `data.py`; cần xác nhận thời điểm thu thập với cơ sở dữ liệu gốc trước triển khai.
-
-Tệp UCI kiểm tra có 4.424 dòng, 37 cột, dấu `;`, không có ô trống, không có dòng trùng hoàn toàn; Dropout 1.421, Enrolled 794, Graduate 2.209. Tên `Daytime/evening attendance` có tab ở cuối trong tệp gốc, được loại khoảng trắng trước khi kiểm định schema. Các thống kê EDA và biểu đồ đặc trưng sau chia chỉ dùng tập train.
-
-## Cài đặt và chạy
-
-Môi trường đã chạy: Python 3.14.6, các phiên bản thư viện ở `requirements.txt`. Cài đặt mới bằng Python 3.14 và pip:
+Kết quả đã lưu được tạo với Python 3.14.6; theo lượt rà soát trước, các thư viện ghim cũng đã được kiểm thử với Python 3.12.3. Khác biệt cây quyết định trên 3.12.3 chưa được tái lập trong lượt rà soát này; xem thảo luận trong báo cáo. Cài đặt:
 
 ```sh
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install -r requirements.txt
-python scripts/download_data.py
-MPLCONFIGDIR=/tmp/fit4013-matplotlib XDG_CACHE_HOME=/tmp/fit4013-cache python train.py
-python3 scripts/verify_results.py
+python -m pip install -r requirements.txt -r requirements-demo.txt
 ```
 
-Tải dữ liệu vào vị trí khác bằng `python scripts/download_data.py --output /duong/dan/data.csv`, rồi chạy `python train.py --data /duong/dan/data.csv`. `--output` của `train.py` chọn thư mục ảnh; mặc định là `results/`. CSV/JSON mặc định ở `data/experiment/`; nếu đổi `--output`, chúng nằm trong `<output>/data/`. Dùng `--tables-output` để chọn vị trí số liệu riêng. `data/raw/` đã được bỏ qua bởi Git; nếu tải sang nơi khác, tự đảm bảo Git không theo dõi dữ liệu thô. Lệnh tải cần Internet. Một lần chạy ghi đè các tệp kết quả cùng tên.
+## Thí nghiệm
 
-**Lệnh đã xác minh trong môi trường hiện tại** (Python 3.14.6, môi trường ảo mới cài từ `requirements.txt`; hai biến cache chỉ cần thiết khi thư mục cache người dùng không ghi được):
+Chia phân tầng 80/20, seed 42; cả bốn tổ hợp dùng cùng 5 fold phân tầng trên train. Mọi bước tiền xử lý được fit trong từng fold. GridSearchCV chọn macro-F1 trung bình:
+
+- K-NN: `n_neighbors={5,11,21}`, `weights={uniform,distance}`, `p={1,2}`.
+- Cây: `max_depth={3,8,12}`, `min_samples_leaf={1,10}`, `class_weight={None,balanced}`.
+- A: điền median và StandardScaler cho biến số; điền mode và one-hot cho biến phân loại.
+- B: như A, thêm gộp mã hiếm qua `OneHotEncoder(min_frequency=0.01)` và hai đặc trưng số chuẩn hóa `age_band`, `admission_grade_difference`.
+
+Chạy đầy đủ theo thứ tự dưới đây từ thư mục gốc. **Các lệnh mặc định ghi đè tệp cùng tên trong `data/experiment/` và ảnh**; lưu bản sao trước khi chạy.
 
 ```sh
-MPLCONFIGDIR=/tmp/fit4013-matplotlib XDG_CACHE_HOME=/tmp/fit4013-cache python3 train.py
-python3 scripts/verify_results.py
+python -m student_success.train
+python scripts/evidence_analysis.py
+python scripts/roc_analysis.py
+python scripts/review_analysis.py
+python scripts/extended_analysis.py
+python scripts/compare_criterion.py
+python scripts/verify_results.py
+python scripts/report_figures.py
+python scripts/experiment_figures.py
 ```
 
-Chương trình kiểm tra schema và nhãn, chia phân tầng 80/20 seed 42 và lưu chỉ số dòng train/test. `scripts/verify_results.py` kiểm tra dữ liệu và kết quả tại đường dẫn mặc định, tính lại metric và ma trận từ dự đoán, đồng thời xác nhận các fold không chứa dòng test. Cả bốn thí nghiệm dùng cùng 5 fold phân tầng, seed 42. Mọi imputation, one-hot và scaler được fit trong fold. A dùng StandardScaler; B dùng RobustScaler, còn lại giống nhau. `GridSearchCV` chọn macro-F1 từ K-NN k={3,5,11,21,31} và cây độ sâu={3,5,8,12,None}; lưu cả dropout recall. Tập test chỉ đánh giá sau khi chọn từng cấu hình. Việc so sánh test không chứng minh khác biệt có ý nghĩa thống kê.
+Huấn luyện ghi ảnh vào `results/`, chỉ số, phân chia, dự đoán, CV và log vào `data/experiment/`. Evidence ghi baseline, ablation, bootstrap và phân tích đặc trưng; ROC ghi AUC; review ghi kiểm toán mô tả; extended ghi EDA, lỗi, độ quan trọng và ảnh; criterion ghi so sánh Gini/entropy. Verify đọc kết quả mặc định và kiểm tra tính nhất quán, không ghi tệp. Hai script cuối vẽ ảnh báo cáo.
 
-## Ứng dụng và notebook
+Chạy an toàn vào thư mục tạm (lệnh verify vẫn kiểm tra kết quả gốc):
 
-Cài thêm `python -m pip install -r requirements-demo.txt`, rồi chạy `streamlit run demo_app.py` để nhập một hồ sơ hoặc tải CSV dự đoán nhiều hồ sơ và xem kết quả. Tệp CSV cần đủ 18 cột UCI, mã phân loại phải xuất hiện trong tập train; ứng dụng cung cấp tệp mẫu chỉ chứa tên cột. Các điểm đầu ra chưa được hiệu chỉnh xác suất. Mở các notebook `00`–`08` trong `notebooks/` bằng VS Code hoặc Jupyter với kernel của môi trường đã cài. Mỗi notebook chạy độc lập: `04_knn` và `05_cay_quyet_dinh` tự chạy CV trên train; các notebook đánh giá và kiểm tra đọc kết quả từ `data/experiment/`. Chạy `python train.py` trước để tạo lại các kết quả này.
+```sh
+python -m student_success.train --data data/raw/data.csv --output /tmp/fit-images --tables-output /tmp/fit-tables
+export FIT_RESULTS=/tmp/fit-tables FIT_IMAGES=/tmp/fit-report-images
+python scripts/evidence_analysis.py
+python scripts/roc_analysis.py
+python scripts/review_analysis.py
+python scripts/extended_analysis.py
+python scripts/compare_criterion.py
+python scripts/verify_results.py
+python scripts/report_figures.py
+python scripts/experiment_figures.py
+unset FIT_RESULTS FIT_IMAGES
+```
 
-## Cấu trúc và kết quả
+Nếu chỉ đổi `--output`, bảng mặc định nằm ở `<output>/data`. Các phân tích dùng `FIT_RESULTS` để đọc và ghi bảng, và `FIT_IMAGES` cho ảnh báo cáo; cần tạo bảng bằng train trước. Xem `scripts/tree_sensitivity.py` để phân tích độ nhạy cây mà không thay kết quả gốc.
 
-- `demo_app.py` và `predict_batch.py`: giao diện Streamlit và kiểm tra/dự đoán CSV theo các bước dữ liệu, EDA, tiền xử lý, mô hình, đánh giá và phân tích lỗi; `notebooks/`: chín notebook theo quy trình, có hai notebook thuật toán riêng.
-- `data.py`, `preprocess.py`, `train.py`, `evaluate.py`: kiểm định và chia dữ liệu, hai luồng, huấn luyện và đánh giá.
-- `scripts/experiment_figures.py`: vẽ các biểu đồ thí nghiệm từ kết quả đã lưu; `scripts/download_data.py`: tải lại CSV UCI; `requirements.txt`: phiên bản thư viện.
-- `data/experiment/audit.json`, `eda_*`: kiểm kê, thống kê, ngoại lệ IQR và biểu đồ. `python scripts/review_analysis.py` bổ sung phân tích mã không rõ/trống, baseline lớp đa số và ví dụ lỗi vào `data/experiment/review_analysis.json`; phân tích này thực hiện sau khi đã xem test, không dùng chọn mô hình.
-- `data/experiment/*_cv.csv`, `cv_folds.json`, `selected.json`, `experiment_log.json`: cấu hình và điểm từng fold, phân chia và log.
-- `data/experiment/summary.csv`, `metrics.json`, `*_classification_report.csv`, `*_confusion_matrix.csv`, `*_predictions.csv` và ảnh trong `results/`: kết quả test và phân tích lỗi. Chỉ số dòng dự đoán ánh xạ vào tệp CSV gốc sau khi đọc, không phải mã sinh viên.
-- `report/course-template/main.tex` và `report/course-template/main.pdf`: báo cáo theo [template giảng viên](https://github.com/TrangLe1912/Template_BCTT_DATN), sử dụng kết quả thực nghiệm; xem hướng dẫn biên dịch bên dưới. `report/report.tex` là bản nháp cũ. `AI_USAGE.md` khai báo sử dụng AI.
+## Demo và notebook
 
-Chi tiết phân công thành viên, slide, demo/vấn đáp, repository GitHub được giảng viên chấp thuận và PDF báo cáo theo template là các mục cần nhóm hoàn tất. Không có commit hay push nào được tạo trong phiên này.
+Chạy `streamlit run app.py`; giao diện nhận một hồ sơ hoặc CSV với 18 cột. Điểm đầu ra chưa được hiệu chỉnh xác suất. Notebook `00`–`08` trong `notebooks/` phân tích, chạy CV hoặc đọc kết quả đã lưu.
 
-Cách tổ chức demo và notebook tham khảo dự án [phân loại spam của buivanchuong9](https://github.com/buivanchuong9/machine_learning-btl); dữ liệu, đặc trưng, mô hình và kết quả trong dự án này thuộc bài toán sinh viên ba lớp.
+## Cấu trúc
+
+- `student_success/data.py`, `preprocess.py`, `train.py`, `evaluate.py`, `labels.py`, `predict_batch.py`: tải và chia dữ liệu, tiền xử lý, huấn luyện, đánh giá, nhãn và dự đoán.
+- `scripts/`: phân tích, kiểm tra, tải lại dữ liệu và vẽ hình; `app.py`: ứng dụng Streamlit.
+- `data/raw/`: dữ liệu UCI được commit; `data/experiment/`: kết quả thực nghiệm đã báo cáo.
+- `results/`: ảnh mặc định do huấn luyện tạo; `report/course-template/images/results/`: ảnh dùng trong báo cáo.
+- `report/course-template/`: nguồn LaTeX và PDF; `notebooks/`: notebook; `TEAM_WORK.md`, `AI_USAGE.md`: phân công và khai báo AI.
 
 ## Biên dịch báo cáo
 
-Từ thư mục gốc, chạy `python scripts/report_figures.py` để vẽ lại hình sau thí nghiệm. Trong `report/course-template`, chạy `XDG_CACHE_HOME=/tmp/fit4013-tectonic-cache tectonic main.tex` (cần Times New Roman hoặc Tinos). Template dựa trên [TrangLe1912/Template_BCTT_DATN](https://github.com/TrangLe1912/Template_BCTT_DATN), phiên bản `0de06d4fd2af99690d0efe874136afc7d24800b1`.
-
-## Việc nhóm cần hoàn tất
-
-Kiểm tra báo cáo và lớp học; bổ sung minh chứng phân công thực tế trong `TEAM_WORK.md`, chuẩn bị slide và thực hành vấn đáp. Mỗi thành viên cần hiểu pipeline, chỉ số và giới hạn.
-
-## Dàn ý thuyết trình
-
-Bài toán và dữ liệu UCI; EDA và chống rò rỉ; hai luồng tiền xử lý; K-NN và cây quyết định; so sánh CV/test; ma trận nhầm lẫn và lỗi; giới hạn; chạy ứng dụng và trả lời câu hỏi.
+Từ `report/course-template`, chạy `XDG_CACHE_HOME=/tmp/fit4013-tectonic-cache tectonic main.tex` (cần Times New Roman hoặc Tinos). Template dựa trên [TrangLe1912/Template_BCTT_DATN](https://github.com/TrangLe1912/Template_BCTT_DATN).

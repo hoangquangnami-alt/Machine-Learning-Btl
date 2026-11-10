@@ -16,7 +16,7 @@ Nhóm giữ nguyên ba nhãn thay vì gộp Enrolled vào Dropout. Một sinh vi
 Ngoài việc xây dựng mô hình, nhóm muốn trả lời hai câu hỏi: thay đổi cách biểu diễn đặc trưng có làm kết quả thay đổi không, và K-NN hay cây quyết định phân loại tốt hơn? Hai luồng dùng cùng 18 cột đầu vào, cùng cách chia và fold; luồng B tạo thêm hai đặc trưng từ các cột này.
 
 \section{Nguồn và cấu trúc dữ liệu}
-Bộ dữ liệu được công bố bởi Realinho và cộng sự trên UCI Machine Learning Repository, có mã DOI và được cấp phép CC BY 4.0 \cite{uci}. Dữ liệu được tổng hợp từ một cơ sở giáo dục đại học với nhiều ngành học. Mỗi dòng trong tệp tương ứng một sinh viên; các cột gồm thông tin nhân khẩu, quá trình đăng ký, kết quả học tập và trạng thái đầu ra.
+Bộ dữ liệu được công bố bởi Realinho và cộng sự trên UCI Machine Learning Repository, có mã DOI và được cấp phép CC BY 4.0 \cite{uci}. Dữ liệu được tổng hợp từ một cơ sở giáo dục đại học tại Bồ Đào Nha với nhiều ngành học. Mỗi dòng trong tệp tương ứng một sinh viên; các cột gồm thông tin nhân khẩu, quá trình đăng ký, kết quả học tập và trạng thái đầu ra.
 
 Tệp \texttt{data.csv} của nhóm có 4.424 dòng và 37 cột, trong đó 36 cột là đặc trưng và cột \texttt{Target} là nhãn. Tệp sử dụng dấu chấm phẩy để phân cách các cột. Một điểm cần chú ý khi đọc dữ liệu là tên cột \texttt{Daytime/evening attendance} trong CSV gốc có ký tự tab ở cuối. Chương trình loại khoảng trắng ở đầu và cuối tên cột trước khi kiểm tra cấu trúc; nếu tập cột hoặc tập nhãn khác dự kiến, chương trình dừng và báo lỗi.
 

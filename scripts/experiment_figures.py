@@ -1,5 +1,6 @@
 """Biểu đồ thí nghiệm từ CSV/JSON đã lưu; không huấn luyện hay chọn lại mô hình."""
 from pathlib import Path
+import os
 import json
 import numpy as np
 import pandas as pd
@@ -9,8 +10,8 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 
 ROOT = Path(__file__).resolve().parent.parent
-R = ROOT / 'data/experiment'
-OUT = ROOT / 'report/course-template/images/results'
+R = Path(os.environ.get('FIT_RESULTS', ROOT / 'data/experiment'))
+OUT = Path(os.environ.get('FIT_IMAGES', ROOT / 'report/course-template/images/results'))
 OUT.mkdir(parents=True, exist_ok=True)
 selected = json.loads((R / 'selected.json').read_text())
 summary = pd.read_csv(R / 'summary.csv').set_index('model')
@@ -117,5 +118,7 @@ bottom.yaxis.set_major_formatter(fmt); clean(bottom)
 bottom.legend(loc='upper center', bbox_to_anchor=(.5,-.18), ncol=2, frameon=False, fontsize=10)
 fig.savefig(OUT/'f1_algorithms.png', dpi=220)
 (ROOT/'results').mkdir(exist_ok=True)
-fig.savefig(ROOT/'results/f1_algorithms.png', dpi=220); plt.close(fig)
+if 'FIT_IMAGES' not in os.environ:
+    fig.savefig(ROOT/'results/f1_algorithms.png', dpi=220)
+plt.close(fig)
 print('Đã tạo biểu đồ đường F1 theo tổ hợp và theo lớp.')

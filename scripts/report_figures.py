@@ -1,5 +1,6 @@
 """Vẽ lại hình trong báo cáo từ dữ liệu và kết quả đã lưu, không huấn luyện lại."""
 from pathlib import Path
+import os
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -8,13 +9,14 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parent.parent
-OUTPUT = ROOT / 'report/course-template/images/results'
+R = Path(os.environ.get('FIT_RESULTS', ROOT / 'data/experiment'))
+OUTPUT = Path(os.environ.get('FIT_IMAGES', ROOT / 'report/course-template/images/results'))
 OUTPUT.mkdir(parents=True, exist_ok=True)
 plt.rcParams.update({'font.family': 'DejaVu Sans', 'font.size': 11, 'axes.titlesize': 12,
                      'axes.labelsize': 11, 'xtick.labelsize': 10, 'ytick.labelsize': 10})
 df = pd.read_csv(ROOT / 'data/raw/data.csv', sep=';')
 df.columns = df.columns.str.strip()
-indices = pd.read_csv(ROOT / 'data/experiment/train_indices.csv').row_index
+indices = pd.read_csv(R / 'train_indices.csv').row_index
 train = df.loc[indices]
 labels = ['Dropout', 'Enrolled', 'Graduate']
 
@@ -39,7 +41,7 @@ ax.barh([str(x) for x in counts.index], counts.values, color='#397bb0')
 ax.set_xlabel('Số sinh viên'); ax.set_ylabel('Mã ngành')
 fig.savefig(OUTPUT/'courses.png', dpi=220); plt.close(fig)
 
-cm = pd.read_csv(ROOT/'data/experiment/A_tree_confusion_matrix.csv', index_col=0).loc[labels, labels].to_numpy()
+cm = pd.read_csv(R/'A_tree_confusion_matrix.csv', index_col=0).loc[labels, labels].to_numpy()
 fig, ax = plt.subplots(figsize=(6.2, 5.0), layout='constrained')
 ax.imshow(cm, cmap='Blues', vmin=0)
 for i in range(3):
@@ -50,7 +52,7 @@ ax.set_xticks(range(3), labels); ax.set_yticks(range(3), labels)
 ax.set_xlabel('Nhãn dự đoán'); ax.set_ylabel('Nhãn thực tế')
 fig.savefig(OUTPUT/'confusion_matrix.png', dpi=220); plt.close(fig)
 
-summary = pd.read_csv(ROOT/'data/experiment/summary.csv').set_index('model').loc[['A_knn','A_tree','B_knn','B_tree']]
+summary = pd.read_csv(R/'summary.csv').set_index('model').loc[['A_knn','A_tree','B_knn','B_tree']]
 fig, ax = plt.subplots(figsize=(7.6, 4.4), layout='constrained')
 x = np.arange(4); width = .34
 for offset, col, label, color in [(-width/2,'macro_f1','Macro-F1','#356fa5'),
@@ -94,7 +96,7 @@ fig.savefig(OUTPUT/'categorical_distributions.png',dpi=220);plt.close(fig)
 
 fig,axes=plt.subplots(2,2,figsize=(10,8.5),layout='constrained')
 for ax,name,title in zip(axes.flat,['A_knn','A_tree','B_knn','B_tree'],['A / K-NN','A / Cây','B / K-NN','B / Cây']):
-    cm=pd.read_csv(ROOT/f'data/experiment/{name}_confusion_matrix.csv',index_col=0).loc[labels,labels].to_numpy()
+    cm=pd.read_csv(R/f'{name}_confusion_matrix.csv',index_col=0).loc[labels,labels].to_numpy()
     ax.imshow(cm,cmap='Blues',vmin=0,vmax=442)
     for i in range(3):
         for j in range(3):

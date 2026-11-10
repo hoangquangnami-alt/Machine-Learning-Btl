@@ -14,6 +14,9 @@ Thành phần & Ưu điểm & Nhược điểm / Hạn chế\\\midrule
 \bottomrule\end{tabular}
 \end{table}
 
+\subsection{Độ nhạy của cây quyết định}\label{sec:tree-sensitivity}
+Các cấu hình cây có điểm CV gần nhau so với độ lệch giữa các fold, nên lựa chọn cấu hình cần được kiểm tra trên môi trường khác. Trên Python 3.14.6, chạy lại giữ nguyên dự đoán và cấu hình của bốn tổ hợp; với B/cây cố định cấu hình đã chọn, macro-F1 test trung bình qua seed 0--9 là 0,4505 (độ lệch chuẩn 0,0026). TODO(human): xác minh thí nghiệm môi trường thứ hai trước khi báo cáo kết quả tái lập.
+
 \section{Phân tích độ quan trọng của đặc trưng (Feature Importances)}
 Trích xuất thuộc tính \texttt{feature\_importances\_} từ mô hình Cây quyết định B (Bảng~\ref{tab:feature-importance}) cho thấy mức độ đóng góp của từng biến vào việc giảm độ hỗn tạp (Gini impurity) qua các điểm chia.
 
@@ -34,14 +37,14 @@ Thứ hạng & Tên đặc trưng & Độ quan trọng\\\midrule
 \bottomrule\end{tabular}
 \end{table}
 
-Độ quan trọng Gini mô tả mức giảm hỗn tạp trong cây được fit; nó không chứng minh tác động nhân quả hay đóng góp ngoài mẫu:
+Mã trình độ mẹ 34 (không rõ) có thể phản ánh quy trình thu thập dữ liệu như đã nêu ở Mục 1.5; giả thuyết này chưa được kiểm tra. Độ quan trọng Gini mô tả mức giảm hỗn tạp trong cây được fit; nó không chứng minh tác động nhân quả hay đóng góp ngoài mẫu:
 \begin{itemize}
     \item Biến do nhóm tự thiết kế — \textbf{hiệu hai điểm} — đứng vị trí thứ 3 toàn bộ mô hình (độ quan trọng $0{,}0921$), vượt qua cả điểm văn bằng trước gốc ($0{,}0650$). Chỉ số này không chứng minh sự ổn định của sinh viên; ablation ở Mục~\ref{sec:ablation} đánh giá việc bỏ biến trên các fold train.
     \item \textbf{Độ tuổi nhập học} là đặc trưng số 1 ($0{,}1505$). Chỉ số cho thấy biến được dùng trong các phép chia của cây, không xác nhận nguyên nhân bỏ học.
 \end{itemize}
 
 \section{Phân tích phân bố lỗi theo nhóm nhân khẩu và ngành học}
-Kiểm tra chi tiết các trường hợp dự đoán sai của mô hình được chọn theo macro-F1 CV (B / K-NN) trên tập test đã xem cho thấy tỷ lệ lỗi phân bố không đồng đều giữa các nhóm:
+Kiểm tra chi tiết các trường hợp dự đoán sai của mô hình được chọn theo macro-F1 CV (B / K-NN) trên tập test cho thấy tỷ lệ lỗi phân bố không đồng đều giữa các nhóm:
 
 \subsection{Phân tích lỗi theo nhóm tuổi}
 \begin{itemize}
@@ -84,5 +87,5 @@ Nhóm ghi nhận một số giới hạn chính của bài nghiên cứu:
 \begin{enumerate}
     \item Dữ liệu thu thập từ một viện giáo dục đại học duy nhất tại Bồ Đào Nha, do đó các quy luật về ngành học và độ tuổi có thể không phản ánh chính xác bối cảnh giáo dục đại học tại Việt Nam.
     \item Việc chỉ sử dụng thông tin tĩnh tại thời điểm nhập học tránh các biến học kỳ chưa có tại thời điểm dự đoán nhưng làm giảm thông tin đầu vào; các trường còn lại vẫn cần xác nhận thời điểm ghi nhận.
-    \item Tập test đã được khảo sát nhiều lần trong quá trình thử nghiệm lặp; do đó các chỉ số trên tập test cần được xem là kết quả mô tả thực nghiệm, cần kiểm chứng độc lập trên các khóa tuyển sinh tiếp theo.
+    \item Giới hạn của tập test được trình bày tại Mục~\ref{sec:split}; cần kiểm chứng trên các khóa tuyển sinh tiếp theo.
 \end{enumerate}

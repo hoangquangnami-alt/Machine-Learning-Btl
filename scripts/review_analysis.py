@@ -1,11 +1,12 @@
 """Describe existing split and predictions without fitting or tuning a model."""
 import json
+import os
 from pathlib import Path
 import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score, recall_score
 
 def main():
-    root = Path('data/experiment')
+    root = Path(os.environ.get('FIT_RESULTS', 'data/experiment'))
     df = pd.read_csv('data/raw/data.csv', sep=';')
     df.columns = df.columns.str.strip()
     train = pd.read_csv(root / 'train_indices.csv').row_index
