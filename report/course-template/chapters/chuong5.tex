@@ -1,0 +1,88 @@
+\chapter{Thảo luận và phân tích lỗi}
+
+\section{So sánh ưu và nhược điểm của các pipeline và mô hình}
+Bảng~\ref{tab:pros-cons} tổng hợp ưu và nhược điểm của từng phương án tiền xử lý (Luồng A vs Luồng B) và từng thuật toán phân loại (K-NN vs Cây quyết định).
+
+\begin{table}[H]\centering\small
+\caption{Ưu và nhược điểm của các pipeline tiền xử lý và mô hình phân loại}\label{tab:pros-cons}
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{5.2cm}>{\raggedright\arraybackslash}p{5.4cm}}\toprule
+Thành phần & Ưu điểm & Nhược điểm / Hạn chế\\\midrule
+\textbf{Luồng A} (Baseline) & Đơn giản, giữ nguyên mọi giá trị phân loại gốc; không làm mất chi tiết của các mã hiếm; dễ cài đặt. & Tạo ma trận đặc trưng thưa thớt (sparse); dễ bị ảnh hưởng bởi nhiễu từ các nhóm quá ít mẫu; không có đặc trưng phi tuyến mới.\\\midrule
+\textbf{Luồng B} (Feature-Engineered) & Giảm số chiều nhiễu nhờ gộp mã hiếm ($<1\%$); bổ sung 2 đặc trưng miền nghiệp vụ (\texttt{age\_band}, hiệu hai điểm) được khảo sát bằng ablation trên train. & Mất đi tính phân biệt chi tiết của các nhóm cá biệt; cần giả định chuyên gia khi chia nhóm tuổi và tính hiệu số điểm.\\\midrule
+\textbf{K-NN} & Đơn giản, phi tham số, không cần giả định phân phối; đạt Accuracy cao nhất ($55{,}48\%$) trên tập test khi kết hợp với Luồng B. & Rất nhạy cảm với độ đo khoảng cách và biến phân loại one-hot; chi phí tính toán tăng theo kích thước tập train; nhận diện lớp Enrolled rất kém.\\\midrule
+\textbf{Cây quyết định} & Khả năng diễn giải tự nhiên thông qua quy tắc rẽ nhánh; cung cấp \texttt{feature\_importances\_}; linh hoạt kết hợp với trọng số lớp cân bằng để cải thiện lớp thiểu số Enrolled. & Dễ bị quá khớp (overfitting) nếu không giới hạn độ sâu; biên quyết định trực giao có thể thô ráp; nhạy cảm với biến động nhỏ của tập train.\\
+\bottomrule\end{tabular}
+\end{table}
+
+\section{Phân tích độ quan trọng của đặc trưng (Feature Importances)}
+Trích xuất thuộc tính \texttt{feature\_importances\_} từ mô hình Cây quyết định B (Bảng~\ref{tab:feature-importance}) cho thấy mức độ đóng góp của từng biến vào việc giảm độ hỗn tạp (Gini impurity) qua các điểm chia.
+
+\begin{table}[H]\centering\small
+\caption{Top 10 đặc trưng quan trọng nhất trong mô hình Cây quyết định (B / Cây)}\label{tab:feature-importance}
+\begin{tabular}{p{1.7cm}p{8.0cm}r}\toprule
+Thứ hạng & Tên đặc trưng & Độ quan trọng\\\midrule
+1 & Tuổi lúc nhập học (\texttt{Age at enrollment}) & 0,1505\\
+2 & Điểm xét tuyển (\texttt{Admission grade}) & 0,1186\\
+3 & \textbf{Hiệu điểm tuyển sinh và văn bằng trước} & \textbf{0,0921}\\
+4 & Điểm văn bằng trước (\texttt{Previous qualification grade}) & 0,0650\\
+5 & Mã ngành 9500 (Điều dưỡng) & 0,0411\\
+6 & Thứ tự nguyện vọng (\texttt{Application order}) & 0,0307\\
+7 & Mã ngành 9238 (Công tác xã hội) & 0,0216\\
+8 & Trình độ mẹ mã 34 (Không rõ) & 0,0199\\
+9 & Giới tính nữ (\texttt{Gender\_0}) & 0,0199\\
+10 & Mã ngành 9119 (Kỹ thuật thông tin) & 0,0155\\
+\bottomrule\end{tabular}
+\end{table}
+
+Độ quan trọng Gini mô tả mức giảm hỗn tạp trong cây được fit; nó không chứng minh tác động nhân quả hay đóng góp ngoài mẫu:
+\begin{itemize}
+    \item Biến do nhóm tự thiết kế — \textbf{hiệu hai điểm} — đứng vị trí thứ 3 toàn bộ mô hình (độ quan trọng $0{,}0921$), vượt qua cả điểm văn bằng trước gốc ($0{,}0650$). Chỉ số này không chứng minh sự ổn định của sinh viên; ablation ở Mục~\ref{sec:ablation} đánh giá việc bỏ biến trên các fold train.
+    \item \textbf{Độ tuổi nhập học} là đặc trưng số 1 ($0{,}1505$). Chỉ số cho thấy biến được dùng trong các phép chia của cây, không xác nhận nguyên nhân bỏ học.
+\end{itemize}
+
+\section{Phân tích phân bố lỗi theo nhóm nhân khẩu và ngành học}
+Kiểm tra chi tiết các trường hợp dự đoán sai của mô hình được chọn theo macro-F1 CV (B / K-NN) trên tập test đã xem cho thấy tỷ lệ lỗi phân bố không đồng đều giữa các nhóm:
+
+\subsection{Phân tích lỗi theo nhóm tuổi}
+\begin{itemize}
+    \item \textbf{Nhóm $< 20$ tuổi}: Tỷ lệ dự đoán sai là 42,1\% (157/373 mẫu). Đây là tỷ lệ sai thấp nhất trong bốn nhóm tuổi được trình bày.
+    \item \textbf{Nhóm 20--24 tuổi}: Tỷ lệ dự đoán sai tăng lên 46,4\% (129/278 mẫu).
+    \item \textbf{Nhóm 25--29 tuổi}: Tỷ lệ dự đoán sai là 47,4\% (45/95 mẫu).
+    \item \textbf{Nhóm $\ge 30$ tuổi}: Tỷ lệ dự đoán sai là 45,3\% (63/139 mẫu).
+\end{itemize}
+Khác biệt về thành phần lớp, quy mô nhóm hoặc đặc trưng không được quan sát là các giả thuyết cần kiểm tra; không thể suy ra hoàn cảnh hay nguyên nhân của từng sinh viên từ bảng này.
+
+\subsection{Phân tích lỗi theo ngành học (Course)}
+\begin{itemize}
+    \item \textbf{Ngành 9085} (Thú y): Tỷ lệ sai 28,3\% (17/60 mẫu).
+    \item \textbf{Ngành 9500} (Điều dưỡng): Tỷ lệ sai 31,4\% (50/159 mẫu). 
+    \item \textbf{Ngành 9773} (Báo chí và Truyền thông): Tỷ lệ sai 35,9\% (23/64 mẫu).
+    \item \textbf{Ngành 9238} (Công tác xã hội): Tỷ lệ sai 39,1\% (25/64 mẫu).
+    \item \textbf{Ngành 9147} (Quản lý): Tỷ lệ sai \textbf{50,0\%} (39/78 mẫu). Các số này chỉ mô tả những ngành được nêu, không chứng minh lý do sai.
+\end{itemize}
+
+\section{Bản chất khó khăn của lớp sinh viên đang theo học (Enrolled)}
+Trong cả 4 tổ hợp, lớp \texttt{Enrolled} luôn có F1-score thấp nhất (từ $0{,}1005$ đến $0{,}3147$). Nhóm xem xét hai giả thuyết, chưa xác định được nguyên nhân từ các phép đo hiện tại:
+\begin{enumerate}
+    \item \textbf{Mất cân bằng mẫu}: Lớp Enrolled chỉ chiếm 17,9\% toàn bộ tập dữ liệu (159 mẫu trong tập test), ít hơn đáng kể so với Graduate (49,9\%) và Dropout (32,1\%).
+    \item \textbf{Trạng thái chuyển tiếp (Transitional State)}: Sinh viên ``Enrolled'' tại thời điểm khảo sát thực chất là những người chưa hoàn thành chương trình đúng thời hạn chuẩn nhưng cũng chưa chính thức làm thủ tục bỏ học. Họ có thể đang trả nợ môn, bảo lưu hoặc học chậm tiến độ. Thông tin nhập học có thể không đủ để phân biệt nhóm này; mức độ chồng lấn đặc trưng cần nghiên cứu thêm.
+\end{enumerate}
+
+\section{Tác động thực tế của các loại sai lầm trong giáo dục}
+Trong bài toán hỗ trợ sinh viên, hai loại sai lầm dự đoán có chi phí và hệ quả xã hội hoàn toàn bất đối xứng:
+
+\begin{itemize}
+    \item \textbf{Bỏ sót sinh viên bỏ học (False Negative -- FN)}:
+    Ở mô hình B / K-NN, có 149 sinh viên bỏ học thực tế bị mô hình dự đoán nhầm thành Enrolled (22 mẫu) hoặc Graduate (127 mẫu). Nếu danh sách dự đoán là kênh sàng lọc duy nhất, những người này có thể không được chủ động liên hệ; dữ liệu không cho biết việc hỗ trợ thực tế của họ.
+    \item \textbf{Cảnh báo nhầm sinh viên bình thường (False Positive -- FP)}:
+    Ở mô hình B / K-NN, có 118 sinh viên (48 Enrolled và 70 Graduate) bị dán nhãn nhầm là có nguy cơ Dropout. Hệ quả của sai lầm này là tốn thời gian và công sức của đội ngũ cố vấn học tập khi phải lên lịch gặp gỡ, trao đổi. Cảnh báo sai có thể gây phiền hà hoặc kỳ thị nếu thông tin bị sử dụng không phù hợp; cần hạn chế truy cập và trao đổi tôn trọng.
+\end{itemize}
+Do đó, trong thực tế, nhà trường nên ưu tiên mô hình có Recall Dropout cao (hoặc chủ động hạ ngưỡng quyết định để đón bắt được nhiều sinh viên nguy cơ hơn), chấp nhận một mức tăng vừa phải của cảnh báo sai.
+
+\section{Giới hạn nghiên cứu}
+Nhóm ghi nhận một số giới hạn chính của bài nghiên cứu:
+\begin{enumerate}
+    \item Dữ liệu thu thập từ một viện giáo dục đại học duy nhất tại Bồ Đào Nha, do đó các quy luật về ngành học và độ tuổi có thể không phản ánh chính xác bối cảnh giáo dục đại học tại Việt Nam.
+    \item Việc chỉ sử dụng thông tin tĩnh tại thời điểm nhập học tránh các biến học kỳ chưa có tại thời điểm dự đoán nhưng làm giảm thông tin đầu vào; các trường còn lại vẫn cần xác nhận thời điểm ghi nhận.
+    \item Tập test đã được khảo sát nhiều lần trong quá trình thử nghiệm lặp; do đó các chỉ số trên tập test cần được xem là kết quả mô tả thực nghiệm, cần kiểm chứng độc lập trên các khóa tuyển sinh tiếp theo.
+\end{enumerate}

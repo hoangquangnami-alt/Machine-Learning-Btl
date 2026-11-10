@@ -1,0 +1,18 @@
+\chapter{Tổng kết và khuyến nghị ứng dụng}
+
+\section{Kết quả và giới hạn}
+B/K-NN đạt macro-F1 CV cao nhất trong bốn tổ hợp ở lưới chính (0,4661). Trên test đã xem, cấu hình này có macro-F1 0,4279, recall Dropout 0,4754 và recall Enrolled 0,0692. B/cây đạt macro-F1 test 0,4517 và recall Enrolled 0,3899, nhưng recall Dropout chỉ 0,3732. Mỗi cấu hình có sự đánh đổi; ưu tiên mô hình cần gắn với mục tiêu hỗ trợ và nguồn lực.
+
+Ablation trên cùng fold cho thấy khi giữ tham số B/K-NN, bỏ nhóm tuổi làm macro-F1 CV giảm 0,0182; bỏ gộp mã hiếm giảm 0,0076. Đây là phép so sánh khám phá sau khi đã chọn cấu hình; cần kiểm tra lại trên dữ liệu khác. Test cũng đã được xem qua nhiều lần phát triển, vì vậy kết quả test ở đây có tính mô tả.
+
+\section{Đề xuất sử dụng trong bối cảnh nhà trường}
+Nếu được xác nhận phù hợp với bối cảnh và đánh giá đầy đủ, kết quả dự đoán có thể hỗ trợ cán bộ công tác sinh viên hoặc cố vấn học tập ưu tiên liên hệ tư vấn; dự đoán không tự quyết định học bổng, tình trạng học tập hay việc sinh viên có được hỗ trợ. Danh sách chỉ là một nguồn tham khảo, cần kết hợp thông tin khác và trao đổi trực tiếp với sinh viên.
+
+\textbf{Cân đối bỏ sót và cảnh báo sai.} Với B/K-NN trên test đã xem, 149 trong 284 Dropout không được gắn nhãn Dropout và 118 mẫu thuộc lớp khác bị gắn nhãn Dropout. Bỏ sót có thể khiến một người không được chủ động liên hệ nếu chỉ dựa vào danh sách; cảnh báo sai tiêu tốn thời gian tư vấn và có thể tạo cảm giác bị gắn nhãn. Nhà trường cần xác định trước số trường hợp có thể liên hệ, chi phí sai lầm và mục tiêu recall. Nếu nghiên cứu ngưỡng điểm Dropout, cần chọn ngưỡng bằng dữ liệu train/validation và kiểm tra trên tập mới; mô hình ba lớp hiện dự đoán theo lớp có điểm lớn nhất, không dùng ngưỡng mặc định 0,5. Các điểm đầu ra chưa được hiệu chỉnh xác suất.
+
+\textbf{Quy trình và bảo vệ dữ liệu.} Người phụ trách được phân quyền phù hợp xem danh sách, liên hệ kín đáo, xác định nhu cầu thực tế rồi giới thiệu hỗ trợ phù hợp; không suy đoán nguyên nhân cá nhân từ điểm mô hình. Chỉ thu thập dữ liệu cần thiết, phân quyền theo nhiệm vụ, bảo vệ tệp và hạn chế thời gian lưu trữ theo quy định của đơn vị. Mã định danh giả danh vẫn có thể liên kết lại với cá nhân và cần được bảo vệ.
+
+\section{Điều kiện trước khi triển khai và hướng phát triển}
+Trước khi thử nghiệm tại một trường, cần xác nhận thời điểm ghi nhận từng biến, sự tương thích của bảng mã và mục đích xử lý dữ liệu; kiểm định trên khóa tuyển sinh mới hoặc dữ liệu độc lập tại trường đó. Theo dõi cả chỉ số theo lớp, nhóm có đủ mẫu và thay đổi phân phối dữ liệu, sau đó rà soát lại khi kết quả suy giảm. Ngưỡng hay khả năng can thiệp chỉ nên được quyết định sau khi thảo luận với người phụ trách thực tế.
+
+Có thể tiếp tục ablation trên các fold train mới hoặc đánh giá kịch bản sau học kỳ 1 như một bài toán riêng với thời điểm dự đoán khác. Bộ dữ liệu chính là UCI 697 theo liên kết của đề tài; phạm vi dự đoán tại thời điểm nhập học cần được giảng viên xác nhận. Chưa có thí nghiệm chứng minh điểm số của kịch bản sau học kỳ 1, do đó không đặt trước giá trị macro-F1 cho kịch bản này.

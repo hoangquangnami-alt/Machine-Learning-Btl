@@ -1,0 +1,78 @@
+\chapter{Phân tích mã nguồn và chức năng}
+
+\section{Cấu trúc chương trình}
+Nhóm tách chương trình thành các mô-đun độc lập theo nguyên tắc đơn nhiệm; các mô-đun nghiệp vụ chính nằm trong gói \texttt{student\_success/}, các kịch bản thực thi nằm trong \texttt{scripts/}, giao diện người dùng nằm trong \texttt{app.py} và chuỗi sổ tay nghiên cứu nằm trong \texttt{notebooks/}. Cấu trúc các tệp chính được tổng hợp trong Bảng~\ref{tab:modules}.
+
+\begin{table}[H]\centering\small
+\caption{Các tệp và thư mục chính của dự án}\label{tab:modules}
+\begin{tabular}{>{\raggedright\arraybackslash}p{4.2cm}>{\raggedright\arraybackslash}p{9.0cm}}\toprule
+Tệp / Thư mục & Chức năng\\\midrule
+\texttt{data.py} & Đọc CSV, kiểm tra tính toàn vẹn lược đồ, xuất bản kiểm kê (\texttt{audit.json}) và phân chia train/test phân tầng.\\
+\texttt{preprocess.py} & Xây dựng hai luồng tiền xử lý (A và B) bằng \texttt{ColumnTransformer} tích hợp trích xuất đặc trưng dẫn xuất.\\
+\texttt{train.py} & Tạo 5 fold phân tầng, thiết lập \texttt{GridSearchCV} tối ưu siêu tham số, xuất ma trận nhầm lẫn và kết quả CV.\\
+\texttt{evaluate.py} & Đánh giá mô hình trên tập test, tính toán bộ chỉ số (Accuracy, Precision, Recall, Macro-F1) và lưu dự đoán.\\
+\texttt{verify\_results.py} & Kịch bản độc lập kiểm tra rò rỉ fold, tính nhất quán của chỉ số dòng và xác thực lại toàn bộ số liệu.\\
+\texttt{download\_data.py} & Tự động tải bộ dữ liệu chính thức từ kho lưu trữ UCI về thư mục chỉ định.\\
+\texttt{app.py} & Ứng dụng web tương tác xây dựng bằng Streamlit phục vụ trình diễn dự đoán đơn lẻ, dự đoán hàng loạt và giải thích kết quả.\\
+\texttt{notebooks/} & Chuỗi 9 Jupyter Notebook (từ \texttt{00\_du\_lieu.ipynb} đến \texttt{08\_kiem\_tra\_ket\_luan.ipynb}) ghi lại chi tiết từng bước thực nghiệm tuần tự.\\\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Đọc và kiểm tra dữ liệu}
+Hàm \texttt{load\_data} trong \texttt{data.py} chịu trách nhiệm kiểm tra tính hợp lệ của tệp nguồn:
+\begin{itemize}
+    \item Đọc tệp CSV với dấu phân cách chấm phẩy, loại bỏ khoảng trắng thừa ở tiêu đề (đặc biệt xử lý ký tự tab ở cột \texttt{Daytime/evening attendance}).
+    \item Kiểm tra lược đồ: bảo đảm có đúng 37 cột dự kiến và các nhãn hợp lệ (\texttt{Dropout}, \texttt{Enrolled}, \texttt{Graduate}). Nếu sai lệch lược đồ hoặc nhãn thiếu/không hợp lệ, hàm dừng và báo lỗi; ô thiếu ở đặc trưng được chuyển cho imputer trong pipeline.
+    \item Tự động sinh tệp \texttt{audit.json} chứa mã băm SHA-256 của tệp nguồn, số lượng dòng, kiểu dữ liệu và số lượng mẫu của từng lớp, phục vụ đối chiếu kết quả.
+\end{itemize}
+
+\section{Xây dựng pipeline và trích xuất đoạn mã then chốt}
+Để ngăn chặn hoàn toàn rò rỉ dữ liệu giữa tập huấn luyện và tập kiểm định, quy trình tiền xử lý được xây dựng hoàn toàn bằng \texttt{ColumnTransformer} và đóng gói trong \texttt{Pipeline} của scikit-learn.
+
+\subsection{Xây dựng bộ tiền xử lý với ColumnTransformer}
+Đoạn trích dưới đây cho thấy cách ghép các nhánh trong ColumnTransformer; ba pipeline con được cấu hình trong \texttt{preprocess.py}:
+
+{\footnotesize\begin{verbatim}
+# Trich tu build_preprocessor(flow):
+# numeric, categorical va engineered da duoc cau hinh o tren
+transformers = [('numeric', numeric, NUMERIC),
+                ('categorical', categorical, CATEGORICAL)]
+if flow == 'B':
+    transformers.append(('engineered', engineered,
+        ['Age at enrollment', 'Admission grade',
+         'Previous qualification (grade)']))
+return ColumnTransformer(transformers)
+\end{verbatim}
+}
+
+\subsection{Tối ưu hóa siêu tham số với GridSearchCV}
+Đoạn mã dưới đây (trích từ \texttt{student\_success/train.py}) thể hiện việc kết hợp Pipeline tiền xử lý với mô hình phân loại và thực hiện kiểm định chéo 5 fold phân tầng:
+
+{\footnotesize\begin{verbatim}
+# Thiet lap Pipeline ket hop bo tien xu ly va bo phan loai
+pipe = Pipeline([
+    ('preprocess', build_preprocessor(flow)),
+    ('model', estimator)
+])
+
+# GridSearchCV tim kiem tren 5 fold phan tang da co dinh
+search = GridSearchCV(
+    pipe, grid, cv=cv,
+    scoring={'macro_f1': 'f1_macro', 'dropout_recall': scorer},
+    refit='macro_f1', n_jobs=1, return_train_score=False
+)
+search.fit(X.loc[train_idx], y.loc[train_idx])
+\end{verbatim}
+}
+
+Việc đặt bộ tiền xử lý bên trong \texttt{Pipeline} đảm bảo mỗi fold validation trong quá trình CV được đối xử hoàn toàn như dữ liệu mới: các tham số $\mu, \sigma$ và từ điển mã hóa one-hot chỉ được học trên 4 fold huấn luyện của vòng lặp đó.
+
+\section{Cách kiểm tra kết quả và ứng dụng demo}
+Kịch bản \texttt{scripts/verify\_results.py} thực hiện kiểm toán độc lập:
+\begin{enumerate}
+    \item Xác minh tập train (3.539 mẫu) và test (885 mẫu) không có phần tử giao nhau.
+    \item Đảm bảo 5 fold kiểm định chéo bao phủ chính xác tập train mà không bị trùng lặp.
+    \item Đọc trực tiếp các tệp dự đoán CSV đã xuất để tính toán lại ma trận nhầm lẫn và các chỉ số, đối chiếu chéo với các tệp JSON kết quả.
+\end{enumerate}
+
+Ứng dụng web trong \texttt{app.py} (triển khai qua Streamlit) cung cấp giao diện trực quan cho phép người dùng chọn bất kỳ tổ hợp mô hình nào trong 4 tổ hợp đã huấn luyện để dự đoán cho hồ sơ sinh viên mới hoặc tải lên tệp danh sách hàng loạt, và các điểm đầu ra theo lớp; ứng dụng không giải thích nguyên nhân của từng dự đoán.

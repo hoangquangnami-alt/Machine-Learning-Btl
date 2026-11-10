@@ -1,0 +1,86 @@
+\chapter{Thiết kế giải pháp và quy trình học máy}
+
+Quy trình chung của bài tập được trình bày ở Sơ đồ~\ref{sd:pipeline}. Sau khi kiểm tra dữ liệu và tách tập, các bước chọn tham số chỉ dùng phần train. Tập test không tham gia chọn tham số bằng CV; tuy nhiên test đã được xem ở các phiên bản trước và không còn là tập kiểm thử cuối cùng độc lập.
+
+\begin{sodo}
+\centering
+\begin{tikzpicture}[every node/.style={font=\small,align=center}, box/.style={draw,rounded corners,minimum height=0.85cm,text width=4.8cm}]
+\node[box] (data) at (0,0) {CSV UCI và kiểm tra dữ liệu};
+\node[box] (features) at (0,-1.35) {Chọn đặc trưng tại lúc nhập học};
+\node[box] (split) at (0,-2.7) {Chia phân tầng train/test};
+\node[box] (cv) at (-3.4,-4.25) {Train: 5 fold, tiền xử lý và chọn tham số};
+\node[box] (test) at (3.4,-4.25) {Test: giữ riêng 885 mẫu};
+\node[box] (refit) at (-3.4,-6) {Fit lại trên toàn bộ train};
+\node[box] (eval) at (0,-7.65) {Đánh giá trên cùng tập test};
+\draw[->] (data) -- (features); \draw[->] (features) -- (split);
+\draw[->] (split) -- (cv); \draw[->] (split) -- (test);
+\draw[->] (cv) -- (refit); \draw[->] (refit) -- (eval); \draw[->] (test) -- (eval);
+\end{tikzpicture}
+\caption{Quy trình xử lý và đánh giá của nhóm}\label{sd:pipeline}
+\end{sodo}
+
+\section{Thời điểm dự đoán và lựa chọn đặc trưng}
+Bài toán được xác định là dự đoán trạng thái học tập của sinh viên tại thời điểm làm thủ tục nhập học; phạm vi này cần được giảng viên xác nhận theo hướng dẫn học phần. Việc xác định thời điểm dự đoán quyết định trực tiếp danh sách đặc trưng được phép sử dụng. Các biến liên quan đến kết quả học tập ở trường đại học (điểm học kỳ 1 và 2) hay biến động tài chính phát sinh sau nhập học (nợ phí, cập nhật học phí) đều bị loại bỏ để tránh dùng thông tin sau thời điểm dự đoán; thời điểm ghi nhận các biến được giữ lại vẫn cần xác nhận (như đã phân tích ở Mục~\ref{sec:leakage}).
+
+Danh sách 18 cột được chọn thủ công theo thời điểm dự đoán; EDA sau đó dùng để mô tả, không phải thuật toán chọn biến:
+\begin{itemize}
+    \item \textbf{4 biến định lượng}: Thứ tự nguyện vọng, điểm văn bằng trước, điểm xét tuyển và tuổi lúc nhập học. Các biến đều có biến thiên trên train; tương quan giữa hai biến điểm là 0,581, nhưng riêng hệ số này không chứng minh tác dụng dự báo của từng biến.
+    \item \textbf{14 biến phân loại}: Tình trạng hôn nhân, Hình thức đăng ký, Ngành học, Ca học, Loại văn bằng trước, Quốc tịch, Trình độ và nghề nghiệp của cha mẹ (4 cột), Tình trạng chuyển nơi ở, Nhu cầu giáo dục đặc biệt, Giới tính, và Sinh viên quốc tế. Các biến này mô tả một phần thông tin nhân khẩu và lộ trình trước nhập học; thời điểm ghi nhận từng trường vẫn cần xác minh.
+\end{itemize}
+
+\section{Chia dữ liệu và kiểm soát rò rỉ}
+Toàn bộ dữ liệu (4.424 dòng) được phân chia thành 80\% tập huấn luyện (3.539 mẫu) và 20\% tập kiểm thử (885 mẫu) bằng phương pháp phân tầng theo nhãn, với tham số ngẫu nhiên cố định \texttt{random\_state = 42}. Chỉ số dòng được lưu trữ trong \texttt{train\_indices.csv} và \texttt{test\_indices.csv} để đảm bảo đối chiếu phép chia.
+
+Trong tập huấn luyện, nhóm thiết lập kiểm định chéo 5 fold phân tầng với seed 42 và xáo trộn trước khi chia. Việc cố định bộ fold này đảm bảo mọi mô hình và mọi cấu hình tiền xử lý đều được đánh giá trên cùng tập mẫu con, loại bỏ nhiễu do phân chia ngẫu nhiên khác nhau.
+
+Để chống rò rỉ thông tin trong quy trình huấn luyện, mọi thao tác tính toán tham số thống kê (như tính trung vị để điền khuyết, học từ điển one-hot, tính giá trị trung bình $\mu$ và độ lệch chuẩn $\sigma$ để chuẩn hóa) đều được đóng gói nghiêm ngặt bên trong \texttt{Pipeline} của scikit-learn. Quá trình kiểm định chéo chỉ thực hiện \texttt{fit} trên 4 fold huấn luyện và \texttt{transform} trên fold kiểm định (validation fold). Test không được dùng trong GridSearchCV, nhưng đã được xem trong các lần phát triển trước; do đó đây không còn là tập kiểm thử cuối cùng độc lập.
+
+\section{Hai luồng tiền xử lý (Luồng A và Luồng B)}
+Để trả lời câu hỏi nghiên cứu của đề bài: \textit{“Thay đổi cách chuẩn bị dữ liệu có làm đổi hiệu quả mô hình không, và tại sao?”}, nhóm thiết kế hai luồng tiền xử lý có sự khác biệt rõ rệt về kỹ thuật đặc trưng và mức độ xử lý phân loại:
+
+\begin{itemize}
+    \item \textbf{Luồng A (Baseline Pipeline)}:
+    \begin{itemize}
+        \item \emph{Biến số}: Điền thiếu bằng trung vị, chuẩn hóa bằng \texttt{StandardScaler} để đưa về phân phối có $\mu = 0, \sigma = 1$.
+        \item \emph{Biến phân loại}: Điền thiếu bằng giá trị xuất hiện nhiều nhất, mã hóa one-hot thông thường (bỏ qua mã chưa gặp). Mọi giá trị danh mục đều được giữ nguyên và tạo thành cột nhị phân riêng biệt.
+    \end{itemize}
+    \item \textbf{Luồng B (Feature-Engineered Pipeline)}:
+    \begin{itemize}
+        \item \emph{Gộp mã hiếm}: Biến phân loại sau khi điền thiếu được mã hóa one-hot có kèm ngưỡng tần suất \texttt{min\_frequency = 0.01} (mã mới được ghép vào nhóm hiếm nếu nhóm đó tồn tại). Các hạng mục xuất hiện dưới 1\% trong tập huấn luyện của fold sẽ được gộp chung vào một nhóm hiếm. Kỹ thuật này giảm số cột one-hot, nhưng gộp các nhóm khác nhau và có thể làm mất thông tin.
+        \item \emph{Trích xuất đặc trưng mới dựa trên giả thuyết EDA}:
+        \begin{enumerate}
+            \item \texttt{age\_band}: Nhóm tuổi rời rạc hóa ($<20$, $20$--$24$, $25$--$29$, $\ge 30$) dựa trên giả thuyết tỷ lệ Dropout tăng vọt ở các lứa tuổi lớn hơn đã phát hiện trong phân tích EDA.
+            \item Hiệu hai điểm: Hiệu số giữa điểm tuyển sinh và điểm văn bằng trước. Đại lượng này biểu diễn chênh lệch giữa hai điểm; không trực tiếp đo áp lực hay nguyên nhân học tập.
+        \end{enumerate}
+        \item Hai đặc trưng dẫn xuất cũng được chuẩn hóa theo trung bình và độ lệch chuẩn.
+    \end{itemize}
+\end{itemize}
+
+\section{Không gian siêu tham số và thuật toán sử dụng}
+Nhóm khảo sát hai thuật toán phân loại cốt lõi với nguyên lý hoạt động bổ trợ lẫn nhau:
+\begin{enumerate}
+    \item \textbf{K láng giềng gần nhất (K-NN)}: Hoạt động dựa trên hình học không gian khoảng cách giữa các điểm dữ liệu. Không gian siêu tham số khảo sát gồm:
+    \begin{itemize}
+        \item Số láng giềng $k \in \{5, 11, 21\}$: khảo sát từ phạm vi cục bộ đến khái quát hóa rộng.
+        \item Trọng số biểu quyết \texttt{weights} $\in \{\text{'uniform'}, \text{'distance'}\}$: biểu quyết đều hoặc ưu tiên mẫu ở gần hơn.
+        \item Độ đo khoảng cách $p \in \{1, 2\}$: khoảng cách Manhattan ($p=1$) và Euclid ($p=2$).
+    \end{itemize}
+    \item \textbf{Cây quyết định (Decision Tree)}: Hoạt động dựa trên các quy tắc phân nhánh trực giao. Mô hình được khởi tạo với \texttt{random\_state = 42} để đảm bảo tính nhất quán của thuật toán chia ngẫu nhiên. Không gian siêu tham số khảo sát gồm:
+    \begin{itemize}
+        \item Độ sâu tối đa \texttt{max\_depth} $\in \{3, 8, 12\}$: kiểm soát độ phức tạp và chống quá khớp.
+        \item Số mẫu tối thiểu ở nút lá \texttt{min\_samples\_leaf} $\in \{1, 10\}$: tạo ràng buộc làm mịn cây.
+        \item Trọng số lớp \texttt{class\_weight} $\in \{\text{None}, \text{'balanced'}\}$: cân nhắc xử lý sự mất cân bằng giữa lớp Enrolled (18\%) và Graduate (50\%).
+    \end{itemize}
+\end{enumerate}
+
+\section{Các độ đo đánh giá và tiêu chí tối ưu}
+Với bài toán 3 lớp mất cân bằng, chỉ số Accuracy tổng thể dễ bị sai lệch bởi lớp đa số (Graduate chiếm 49,9\%). Do đó, nhóm sử dụng:
+\begin{itemize}
+    \item \textbf{Macro-averaged F1 (Macro-F1)}: Trung bình số học không trọng số của F1-score trên cả 3 lớp:
+    \[
+      \text{Macro-F1} = \frac{\text{F1}_{\text{Dropout}} + \text{F1}_{\text{Enrolled}} + \text{F1}_{\text{Graduate}}}{3}.
+    \]
+    Đây là tiêu chí mục tiêu duy nhất (\texttt{refit='macro\_f1'}) dùng trong \texttt{GridSearchCV} để lựa chọn siêu tham số tối ưu.
+    \item \textbf{Recall của lớp Dropout}: Tỷ lệ phát hiện đúng các sinh viên thực sự có nguy cơ bỏ học ($TP / (TP + FN)$). Đây là chỉ số nghiệp vụ mang tính sống còn đối với nhà trường.
+    \item Ngoài ra, ma trận nhầm lẫn đầy đủ ($3 \times 3$) được theo dõi cho từng mô hình để đánh giá chi tiết dòng chuyển dịch lỗi giữa các cặp nhãn.
+\end{itemize}

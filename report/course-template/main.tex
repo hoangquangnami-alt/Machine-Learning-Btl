@@ -1,0 +1,23 @@
+% Mẫu báo cáo giảng viên, điều chỉnh cho bài tập lớn FIT4013.
+% Biên dịch từ thư mục này bằng XeLaTeX hai lần.
+\documentclass[12pt,a4paper,oneside]{extreport}
+\input{settings}
+\begin{document}
+\pagenumbering{gobble}
+\input{cover}
+\clearpage
+\pagenumbering{roman}\setcounter{page}{1}
+\input{frontmatter/danh_muc_viet_tat}
+\clearpage\CombinedLists
+\clearpage\tableofcontents
+\clearpage\input{frontmatter/mo_dau}
+\clearpage\pagenumbering{arabic}\setcounter{page}{1}
+\include{chapters/chuong1}
+\include{chapters/chuong2}
+\include{chapters/chuong3}
+\include{chapters/chuong4}
+\include{chapters/chuong5}
+\include{chapters/chuong6}
+\clearpage\input{backmatter/phu_luc}
+\clearpage\input{backmatter/tai_lieu_tham_khao}
+\end{document}
