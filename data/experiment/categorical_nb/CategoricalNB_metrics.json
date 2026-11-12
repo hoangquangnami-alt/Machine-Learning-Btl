@@ -1,0 +1,58 @@
+{
+  "accuracy": 0.5514124293785311,
+  "classification_report": {
+    "Dropout": {
+      "precision": 0.5328467153284672,
+      "recall": 0.5140845070422535,
+      "f1-score": 0.5232974910394266,
+      "support": 284.0
+    },
+    "Enrolled": {
+      "precision": 0.27956989247311825,
+      "recall": 0.16352201257861634,
+      "f1-score": 0.20634920634920634,
+      "support": 159.0
+    },
+    "Graduate": {
+      "precision": 0.61003861003861,
+      "recall": 0.7149321266968326,
+      "f1-score": 0.6583333333333333,
+      "support": 442.0
+    },
+    "accuracy": 0.5514124293785311,
+    "macro avg": {
+      "precision": 0.47415173928006515,
+      "recall": 0.4641795487725675,
+      "f1-score": 0.46266001024065534,
+      "support": 885.0
+    },
+    "weighted avg": {
+      "precision": 0.525895079879747,
+      "recall": 0.5514124293785311,
+      "f1-score": 0.5337958696023213,
+      "support": 885.0
+    }
+  },
+  "confusion_matrix": [
+    [
+      146,
+      32,
+      106
+    ],
+    [
+      37,
+      26,
+      96
+    ],
+    [
+      91,
+      35,
+      316
+    ]
+  ],
+  "labels": [
+    "Dropout",
+    "Enrolled",
+    "Graduate"
+  ]
+}

@@ -122,3 +122,32 @@ Nhóm lấy mẫu bootstrap phân tầng 2.000 lần từ các dự đoán cố 
 
 \section{ROC-AUC cho cấu hình B/K-NN}
 Nhóm tính ROC-AUC one-vs-rest theo từng lớp từ điểm đầu ra của B/K-NN. Trên các dự đoán out-of-fold của train, ROC-AUC macro là 0,6640; trên tập test, macro là 0,6433, gồm Dropout 0,6841, Enrolled 0,5774 và Graduate 0,6685. Cấu hình đã được chọn bằng CV trên cùng train trước phép tính out-of-fold nên các điểm train là mô tả sau lựa chọn; giới hạn của tập test nêu tại Mục~\ref{sec:split}. ROC-AUC đánh giá thứ tự điểm theo từng lớp trên nhiều ngưỡng, không chứng minh các điểm đã được hiệu chỉnh xác suất. Kết quả và cách tính nằm trong \texttt{data/experiment/B\_knn\_roc\_auc.csv} và \texttt{scripts/roc\_analysis.py}.
+
+\section{Thí nghiệm khám phá CategoricalNB riêng}\label{sec:categorical-nb}
+Thí nghiệm này không bổ sung ô cho thiết kế $2\times2$. Giả thuyết là nhiều trong 18 trường nhập học là phân loại: khoảng cách K-NN trên one-hot có thể khó phản ánh độ gần, còn cây có thể khớp quá mức. CategoricalNB mô hình hóa xác suất của từng giá trị rời rạc theo lớp với giả định độc lập có điều kiện; tính phù hợp và hiệu quả cần được đo, không mặc định đúng. Khác GaussianNB, nó không giả định mã danh mục là đại lượng liên tục có phân phối Gaussian, vì khoảng cách giữa các mã danh mục không mang nghĩa số học.
+
+Pipeline dùng mode trong fold huấn luyện cho 14 trường phân loại, mã hóa mỗi trường thành một cột, mã đã biết từ 1 và dự phòng 0 cho giá trị chưa thấy; bộ phân loại cấp đủ miền giá trị kể cả mã 0 không xuất hiện khi fit. Bốn trường số được điền median và chia khoảng bằng \texttt{KBinsDiscretizer} với mã thứ tự; cột hằng và các biên trùng được thư viện xử lý bằng một khoảng hoặc giảm số khoảng thực tế. Không học tập giá trị hay biên khoảng từ validation/test. Lưới gồm $\alpha\in\{0{,}1;0{,}5;1;2;5\}$, số khoảng $\{3,5,8\}$, chiến lược quantile hoặc uniform, \texttt{fit\_prior=True}; không lấy mẫu con để tính biên. Chọn macro-F1 CV, được $\alpha=0{,}5$, tám khoảng quantile. Dùng đúng 3.539 dòng train, 885 dòng test và năm fold phân tầng đã lưu. Test từng được xem trong phát triển, nên chỉ là đánh giá khám phá; không tham gia chọn cấu hình.
+
+\begin{table}[htbp]\centering\small
+\caption{So sánh CV trên train: cấu hình được chọn của mỗi mô hình; độ lệch chuẩn theo fold.}\label{tab:nb-cv}
+\begin{tabular}{lrrrrr}\toprule
+Mô hình & Macro-F1 & SD & P Dropout & R Dropout & F1 Dropout\\\midrule
+A/K-NN & 0,4455 & 0,0083 & 0,4865 & 0,5092 & 0,4973\\
+A/Decision Tree & 0,4508 & 0,0242 & 0,4896 & 0,4811 & 0,4838\\
+B/K-NN & 0,4661 & 0,0168 & 0,5465 & 0,5030 & 0,5223\\
+B/Decision Tree & 0,4508 & 0,0202 & 0,4936 & 0,4538 & 0,4696\\
+CategoricalNB & 0,5033 & 0,0147 & 0,5580 & 0,5303 & 0,5430\\\bottomrule
+\end{tabular}\end{table}
+Nguồn: \texttt{data/experiment/categorical\_nb/comparison\_cv.csv}; bốn cấu hình cũ được fit lại để bổ sung precision và F1 Dropout, và macro-F1 từng fold khớp tệp gốc. NB cao hơn B/K-NN 0,0372 macro-F1 và 0,0272 recall Dropout trên CV. Đây là điểm dùng để chọn siêu tham số, có thể lạc quan; năm fold không phải năm thí nghiệm độc lập và không chứng minh ý nghĩa thống kê.
+
+Trên test đã lộ trong phát triển, NB đạt accuracy 0,5514; macro precision/recall/F1 lần lượt 0,4742 / 0,4642 / 0,4627. Dropout precision/recall/F1 là 0,5328 / 0,5141 / 0,5233; Enrolled là 0,2796 / 0,1635 / 0,2063; Graduate là 0,6100 / 0,7149 / 0,6583. Macro-F1 test của A/K-NN, A/Decision Tree, B/K-NN, B/Decision Tree lần lượt 0,3955, 0,4393, 0,4279, 0,4517; các so sánh này chỉ mang tính khám phá. Ma trận sau có hàng là thực tế, cột là dự đoán:
+\begin{center}\begin{tabular}{lrrr}\toprule
+ & Dropout & Enrolled & Graduate\\\midrule
+Dropout & 146 & 32 & 106\\
+Enrolled & 37 & 26 & 96\\
+Graduate & 91 & 35 & 316\\\bottomrule
+\end{tabular}\end{center}
+
+Ba sai lệch minh họa theo chỉ số dòng 0-based trong CSV (mã Course là danh mục, không phải thứ tự): dòng 3439 thực Dropout, dự đoán Graduate, Course 9556, tuổi 19, điểm xét tuyển 106,0; dòng 1787 thực Graduate, dự đoán Dropout, Course 9991, tuổi 27, điểm 140,0; dòng 510 thực Enrolled, dự đoán Graduate, Course 9070, tuổi 18, điểm 120,7. Một giả thuyết thận trọng chung là kết hợp các giá trị này có xác suất theo lớp gây nhầm lẫn, trong khi giả định độc lập không nắm được tương tác giữa chúng; chưa có phân tích đóng góp đặc trưng cho từng dự đoán nên không thể xác định nguyên nhân. Các dòng và nhãn có thể kiểm tra trong \texttt{CategoricalNB\_predictions.csv} và dữ liệu gốc.
+
+Rời rạc hóa làm mất chi tiết trong từng khoảng và nhạy với biên; độc lập có điều kiện có thể sai khi các trường liên quan. Recall Enrolled trên test chỉ 0,1635. Cần đánh giá khóa mới độc lập, cũng như cân đối bỏ sót và cảnh báo sai, trước khi sử dụng thực tế.

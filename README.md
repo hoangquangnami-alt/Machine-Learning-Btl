@@ -70,3 +70,17 @@ Chạy `streamlit run app.py`; giao diện nhận một hồ sơ hoặc CSV vớ
 ## Biên dịch báo cáo
 
 Từ `report/course-template`, chạy `XDG_CACHE_HOME=/tmp/fit4013-tectonic-cache tectonic main.tex` (cần Times New Roman hoặc Tinos). Template dựa trên [TrangLe1912/Template_BCTT_DATN](https://github.com/TrangLe1912/Template_BCTT_DATN).
+
+## Thí nghiệm khám phá CategoricalNB
+
+Thí nghiệm riêng kiểm tra biểu diễn từng trường phân loại và rời rạc hóa biến số, không thay đổi bốn tổ hợp A/B × K-NN/Cây. Chạy từ gốc repository với các thư viện ghim:
+
+```sh
+python scripts/categorical_nb_experiment.py
+python -m unittest discover -s tests -v
+python scripts/verify_results.py
+```
+
+Script đọc split và fold đã lưu, chọn theo macro-F1 CV trên train; fit lại bốn cấu hình cũ trên đúng fold để tính thêm chỉ số Dropout, kiểm tra từng điểm macro-F1 với tệp gốc. Các tệp mới được ghi vào `data/experiment/categorical_nb/` (grid đầy đủ, fold, so sánh CV, cấu hình, log phiên bản, dự đoán và chỉ số test); ảnh được ghi vào `report/course-template/images/results/categorical_nb_cv_comparison.png` và `CategoricalNB_confusion_matrix.png`. Chạy lại ghi đè các tệp NB này, không ghi đè bốn mô hình cũ. Mã chưa biết được dành mã 0; các bước điền thiếu, mã hóa và tính biên đều fit trong fold. Quantile không subsample, seed 42; cảnh báo biên trùng có thể làm giảm số khoảng thực tế. Kết quả phụ thuộc phiên bản trong `run_log.json`.
+
+Kết quả đã chạy: NB có macro-F1 CV 0,5033 so với 0,4661 của B/K-NN, recall Dropout tương ứng 0,5303 so với 0,5030. Test đã được xem trong phát triển nên chỉ dùng khám phá: NB macro-F1 0,4627, recall Dropout 0,5141, recall Enrolled 0,1635. Các điểm chọn theo CV không chứng minh cải thiện trên tập độc lập.

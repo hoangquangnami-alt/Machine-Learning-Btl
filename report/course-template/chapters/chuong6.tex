@@ -16,3 +16,6 @@ Nếu được xác nhận phù hợp với bối cảnh và đánh giá đầy 
 Trước khi thử nghiệm tại một trường, cần xác nhận thời điểm ghi nhận từng biến, sự tương thích của bảng mã và mục đích xử lý dữ liệu; kiểm định trên khóa tuyển sinh mới hoặc dữ liệu độc lập tại trường đó. Theo dõi cả chỉ số theo lớp, nhóm có đủ mẫu và thay đổi phân phối dữ liệu, sau đó rà soát lại khi kết quả suy giảm. Ngưỡng hay khả năng can thiệp chỉ nên được quyết định sau khi thảo luận với người phụ trách thực tế.
 
 Có thể tiếp tục ablation trên các fold train mới hoặc đánh giá kịch bản sau học kỳ 1 như một bài toán riêng với thời điểm dự đoán khác. Bộ dữ liệu chính là UCI 697 theo liên kết của đề tài; phạm vi dự đoán tại thời điểm nhập học cần được giảng viên xác nhận. Chưa có thí nghiệm chứng minh điểm số của kịch bản sau học kỳ 1, do đó không đặt trước giá trị macro-F1 cho kịch bản này.
+
+\section{Bổ sung từ thí nghiệm khám phá}
+CategoricalNB đạt macro-F1 CV 0,5033 và recall Dropout 0,5303, cao hơn B/K-NN trong cùng các fold; cấu hình được lựa chọn theo CV nên không xem chênh lệch là ước lượng không thiên lệch hay có ý nghĩa thống kê. Trên test đã xem, macro-F1 là 0,4627 và recall Dropout 0,5141; recall Enrolled còn thấp 0,1635. Các kết quả, giới hạn mô hình và nhu cầu test độc lập được trình bày tại Mục~\ref{sec:categorical-nb}.

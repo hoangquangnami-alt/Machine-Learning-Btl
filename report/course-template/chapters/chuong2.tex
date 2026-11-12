@@ -41,7 +41,7 @@ Trong tập huấn luyện, nhóm thiết lập kiểm định chéo 5 fold phâ
 \begin{itemize}
     \item \textbf{Luồng A (Baseline Pipeline)}:
     \begin{itemize}
-        \item \emph{Biến số}: Điền thiếu bằng trung vị, chuẩn hóa bằng \texttt{StandardScaler} để đưa về phân phối có $\mu = 0, \sigma = 1$.
+        \item \emph{Biến số}: Điền thiếu bằng trung vị, chuẩn hóa bằng \texttt{StandardScaler} bằng cách trừ trung bình và chia độ lệch chuẩn trên train; thao tác này không biến phân phối thành Gaussian.
         \item \emph{Biến phân loại}: Điền thiếu bằng giá trị xuất hiện nhiều nhất, mã hóa one-hot thông thường (bỏ qua mã chưa gặp). Mọi giá trị danh mục đều được giữ nguyên và tạo thành cột nhị phân riêng biệt.
     \end{itemize}
     \item \textbf{Luồng B (Feature-Engineered Pipeline)}:

@@ -1,0 +1,10 @@
+{
+  "params": {
+    "model__alpha": 0.5,
+    "preprocess__numeric__bins__n_bins": 8,
+    "preprocess__numeric__bins__strategy": "quantile"
+  },
+  "cv_macro_f1": 0.5032965479023651,
+  "best_index": 10,
+  "fit_prior": true
+}

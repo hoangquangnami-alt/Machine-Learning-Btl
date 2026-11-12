@@ -1,17 +1,17 @@
 # Phân công và nhật ký nhóm
 
-Bảng dưới đây ghi lại lịch sử Git, không thay thế nhật ký công việc của từng thành viên. Số commit không phải thước đo duy nhất: mỗi người cần tự bổ sung phần việc thực tế và đọc lại phần mình chịu trách nhiệm. Commit `9186a02` tập hợp nhiều thay đổi; người đứng tên cần hiểu các thay đổi đó khi trình bày.
+Bảng phân công dưới đây phân chia trách nhiệm rà soát và trình bày cho bốn thành viên. Đây là phân công hiện tại, không phải xác nhận ai đã thực hiện công việc trong quá khứ; mỗi thành viên cần kiểm tra nội dung được giao và thống nhất tiến độ với nhóm. Lịch sử Git phía dưới chỉ ghi các thay đổi trong repository.
 
-## Nhật ký công việc của thành viên
+## Phân công công việc
 
-Mỗi thành viên tự ghi công việc, thời gian và minh chứng của mình; không suy ra phân công từ tác giả commit.
+| Thành viên | Phần phụ trách | Tài liệu và mã cần rà soát |
+|---|---|---|
+| Hoàng Quang Nam | Dữ liệu và phạm vi bài toán: kiểm tra nguồn, 18 trường tại thời điểm nhập học, chia dữ liệu và phân tích mô tả; trình bày dữ liệu và giới hạn. | `student_success/data.py`, `data/raw/`, báo cáo chương 1–2 |
+| Bùi Huy Bình | Tiền xử lý và đặc trưng: kiểm tra luồng A/B, chống rò rỉ, xử lý dữ liệu thiếu và đặc trưng dẫn xuất; trình bày lựa chọn tiền xử lý. | `student_success/preprocess.py`, notebook tiền xử lý, báo cáo chương 2 |
+| Hoàng Nhật Huy | Huấn luyện và thí nghiệm: kiểm tra K-NN, Decision Tree, lưới tham số và thí nghiệm CategoricalNB; trình bày quy trình chọn mô hình. | `student_success/train.py`, `student_success/categorical_nb.py`, `scripts/categorical_nb_experiment.py`, báo cáo chương 3–4 |
+| Nguyễn Văn Linh | Đánh giá và ứng dụng: kiểm tra chỉ số, dự đoán, sai lệch, tái lập kết quả và demo; trình bày kết luận và giới hạn triển khai. | `student_success/evaluate.py`, `scripts/verify_results.py`, `app.py`, báo cáo chương 4–6 |
 
-| Thành viên | Công việc | Thời gian | Minh chứng |
-|---|---|---|---|
-| Hoàng Quang Nam | TODO(member) | TODO(member) | TODO(member) |
-| Bùi Huy Bình | TODO(member) | TODO(member) | TODO(member) |
-| Hoàng Nhật Huy | TODO(member) | TODO(member) | TODO(member) |
-| Nguyễn Văn Linh | TODO(member) | TODO(member) | TODO(member) |
+Mỗi thành viên chịu trách nhiệm đọc lại phần được giao, kiểm tra bằng chứng tương ứng và chuẩn bị giải thích; thời gian thực hiện và đóng góp thực tế do từng người tự xác nhận với nhóm.
 
 ## Nhật ký Git
 
@@ -25,12 +25,12 @@ Area ghi nhóm đường dẫn xuất hiện trong commit, không suy diễn tr�
 | 2026-11-10 | hoangquangnami-alt | `7307b1f` Add AI usage documentation | `AI_USAGE.md` |
 | 2026-11-10 | hoangquangnami-alt | `1a5c74a` Add data loading and validation functions | `student_success/` |
 | 2026-11-10 | hoangquangnami-alt | `e7c99dc` Add initial docstring for student success pipeline | `student_success/` |
-| 2026-11-10 | hoangquangnami-alt | `eef2a41` thêm báo cáo latex theo template của cô | TODO(member) |
+| 2026-11-10 | hoangquangnami-alt | `eef2a41` thêm báo cáo latex theo template của cô | Không có thay đổi tệp trong commit |
 | 2026-11-10 | hoangquangnami-alt | `ae6c936` thêm báo cáo latex theo template của cô | `report/` |
 | 2026-11-10 | Nhật Huy | `b37552e` Delete report/course-template directory | `report/` |
 | 2026-11-10 | huybinh7826 | `18746c5` Delete report/course-template/chapters directory | `report/` |
 | 2026-11-10 | hoangquangnami-alt | `1446b03` Delete report/course-template/backmatter directory | `report/` |
-| 2026-11-10 | hoangquangnami-alt | `dd4be2a` thêm các notebook | TODO(member) |
+| 2026-11-10 | hoangquangnami-alt | `dd4be2a` thêm các notebook | Không có thay đổi tệp trong commit |
 | 2026-11-10 | hoangquangnami-alt | `ad5b8bb` thêm các notebook | `notebooks/` |
 | 2026-11-10 | Nhật Huy | `eb5d279` Delete notebooks/08_kiem_tra_ket_luan.ipynb | `notebooks/` |
 | 2026-11-10 | Nhật Huy | `02f8f55` Delete notebooks/07_phan_tich_loi.ipynb | `notebooks/` |
